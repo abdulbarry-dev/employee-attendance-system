@@ -196,7 +196,6 @@
                                     <flux:icon.document-duplicate x-show="!copied" variant="outline"></flux:icon>
                                     <flux:icon.check
                                         x-show="copied"
-                                        variant="solid"
                                         class="text-green-500"
                                     ></flux:icon>
                                 </button>

@@ -110,7 +110,7 @@
                                             <flux:button
                                                 wire:click="confirmDelete({{ $employee->id }})"
                                                 size="sm"
-                                                variant="negative"
+                                                variant="danger"
                                                 icon="trash"
                                                 tooltip="{{ __('Delete employee') }}"
                                             />
@@ -189,7 +189,7 @@
                 <flux:button wire:click="$set('showDeleteModal', false)" variant="ghost">
                     {{ __('Cancel') }}
                 </flux:button>
-                <flux:button wire:click="delete" variant="negative">
+                <flux:button wire:click="delete" variant="danger">
                     {{ __('Delete Employee') }}
                 </flux:button>
             </div>

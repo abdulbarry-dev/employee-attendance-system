@@ -43,7 +43,7 @@
                 <flux:button
                     x-show="showRecoveryCodes"
                     icon="arrow-path"
-                    variant="filled"
+                    variant="primary"
                     wire:click="regenerateRecoveryCodes"
                 >
                     {{ __('Regenerate Codes') }}
