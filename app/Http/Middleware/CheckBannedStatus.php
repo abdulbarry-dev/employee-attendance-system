@@ -22,9 +22,27 @@ class CheckBannedStatus
             $request->session()->regenerateToken();
 
             return redirect('/login')
-                ->with('error', 'Your account has been banned. Please contact the administrator.');
+                ->withErrors(['email' => $this->getBannedMessage($request->user())]);
         }
 
         return $next($request);
     }
+
+    /**
+     * Get a user-friendly message for banned users.
+     */
+    private function getBannedMessage($user): string
+    {
+        $banReason = $user->ban_reason ? trim($user->ban_reason) : null;
+        $bannedAt = $user->banned_at?->format('F d, Y');
+
+        if ($banReason) {
+            return "Your account has been suspended. Reason: {$banReason}" . ($bannedAt ? " (Suspended on {$bannedAt})" : "");
+        }
+
+        return $bannedAt
+            ? "Your account has been suspended on {$bannedAt}. Please contact the administrator for assistance."
+            : "Your account has been suspended. Please contact the administrator for assistance.";
+    }
 }
+

@@ -59,6 +59,20 @@ class FortifyServiceProvider extends ServiceProvider
                 return false;
             }
 
+            // Check if user is banned - block login before proceeding
+            if ($user->isBanned()) {
+                Log::warning('Banned user attempted login', [
+                    'user_id' => $user->id,
+                    'email' => $user->email,
+                    'ip' => $request->ip(),
+                    'ban_reason' => $user->ban_reason,
+                    'banned_at' => $user->banned_at,
+                ]);
+                throw ValidationException::withMessages([
+                    Fortify::username() => [$this->getBannedMessage($user)],
+                ]);
+            }
+
             // Check if user is admin - admins can log in without QR token
             if ($user->hasRole('admin')) {
                 Log::info('Admin login bypasses QR token', [
@@ -225,5 +239,22 @@ class FortifyServiceProvider extends ServiceProvider
 
             return Limit::perMinute(5)->by($throttleKey);
         });
+    }
+
+    /**
+     * Get a user-friendly message for banned users.
+     */
+    private function getBannedMessage(User $user): string
+    {
+        $banReason = $user->ban_reason ? trim($user->ban_reason) : null;
+        $bannedAt = $user->banned_at?->format('F d, Y');
+
+        if ($banReason) {
+            return "Your account has been suspended. Reason: {$banReason}" . ($bannedAt ? " (Suspended on {$bannedAt})" : "");
+        }
+
+        return $bannedAt 
+            ? "Your account has been suspended on {$bannedAt}. Please contact the administrator for assistance."
+            : "Your account has been suspended. Please contact the administrator for assistance.";
     }
 }

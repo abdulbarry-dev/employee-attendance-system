@@ -17,6 +17,10 @@ class EmployeeList extends Component
     public bool $showDeleteModal = false;
     public ?int $employeeIdToDelete = null;
 
+    public bool $showBanModal = false;
+    public ?int $employeeIdToBan = null;
+    public string $banReason = '';
+
 
     public function employees()
     {
@@ -52,18 +56,51 @@ class EmployeeList extends Component
         $this->resetPage();
     }
 
-    public function ban(User $employee)
+    public function confirmBan(User $employee)
     {
         $this->authorize('ban', $employee);
 
-        $employee->update(['is_banned' => true]);
+        $this->employeeIdToBan = $employee->id;
+        $this->banReason = '';
+        $this->showBanModal = true;
+    }
+
+    public function ban()
+    {
+        if (!$this->employeeIdToBan) {
+            return;
+        }
+
+        $employee = User::find($this->employeeIdToBan);
+
+        if ($employee) {
+            $this->authorize('ban', $employee);
+            $employee->update([
+                'is_banned' => true,
+                'ban_reason' => $this->banReason ?: null,
+                'banned_at' => now(),
+            ]);
+        }
+
+        $this->closeBanModal();
+    }
+
+    public function closeBanModal()
+    {
+        $this->showBanModal = false;
+        $this->employeeIdToBan = null;
+        $this->banReason = '';
     }
 
     public function unban(User $employee)
     {
         $this->authorize('unban', $employee);
 
-        $employee->update(['is_banned' => false]);
+        $employee->update([
+            'is_banned' => false,
+            'ban_reason' => null,
+            'banned_at' => null,
+        ]);
     }
 
     public function confirmDelete(int $employeeId)

@@ -104,7 +104,7 @@
                                             @if($employee->is_banned)
                                                 <flux:button wire:click="unban({{ $employee->id }})" size="sm" variant="ghost" icon="check-circle" tooltip="{{ __('Unban employee') }}" />
                                             @else
-                                                <flux:button wire:click="ban({{ $employee->id }})" size="sm" variant="ghost" icon="no-symbol" tooltip="{{ __('Ban employee') }}" />
+                                                <flux:button wire:click="confirmBan({{ $employee->id }})" size="sm" variant="ghost" icon="no-symbol" tooltip="{{ __('Ban employee') }}" />
                                             @endif
 
                                             <flux:button
@@ -191,6 +191,55 @@
                 </flux:button>
                 <flux:button wire:click="delete" variant="danger">
                     {{ __('Delete Employee') }}
+                </flux:button>
+            </div>
+        </div>
+    </x-modal>
+
+    <!-- Ban Employee Modal -->
+    <x-modal wire:model="showBanModal" maxWidth="md">
+        <div class="p-6">
+            <div class="mb-5 flex items-center justify-center">
+                <div class="rounded-full bg-amber-100 p-3 dark:bg-amber-900/30">
+                    <svg class="size-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.172l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <h3 class="text-lg font-medium text-zinc-900 dark:text-white">
+                    {{ __('Suspend Employee Account') }}
+                </h3>
+                <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+                    {{ __('This will prevent the employee from logging in. Provide a reason for the suspension.') }}
+                </p>
+            </div>
+
+            <div class="mt-6 space-y-4">
+                <div>
+                    <label for="banReason" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                        {{ __('Reason for Suspension') }} <span class="text-red-500">*</span>
+                    </label>
+                    <textarea
+                        id="banReason"
+                        wire:model="banReason"
+                        rows="3"
+                        placeholder="{{ __('e.g., Policy violation, Misconduct, Temporary suspension') }}"
+                        class="mt-2 w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-white dark:placeholder-zinc-500"
+                    ></textarea>
+                    <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                        {{ __('This reason will be shown to the employee when they try to log in.') }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-3">
+                <flux:button wire:click="closeBanModal" variant="ghost">
+                    {{ __('Cancel') }}
+                </flux:button>
+                <flux:button wire:click="ban" variant="warning">
+                    {{ __('Suspend Employee') }}
                 </flux:button>
             </div>
         </div>
