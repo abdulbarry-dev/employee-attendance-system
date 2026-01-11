@@ -87,16 +87,23 @@ class EmployeeSalaryHistory extends Component
     {
         $user = Auth::user();
 
-        // Get working days configuration (array of day names: ['Monday', 'Tuesday', ...])
-        $workingDaysConfig = $user->working_days ?? ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        // Get working days configuration - stored as lowercase short codes ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+        $workingDaysConfig = $user->working_days ?? ['mon', 'tue', 'wed', 'thu', 'fri'];
+
+        // Ensure array format and lowercase
+        if (is_array($workingDaysConfig)) {
+            $workingDaysConfig = array_map('strtolower', $workingDaysConfig);
+        } else {
+            $workingDaysConfig = ['mon', 'tue', 'wed', 'thu', 'fri'];
+        }
 
         // Count total working days in the month
         $period = CarbonPeriod::create($startOfMonth, $endOfMonth);
         $totalWorkingDays = 0;
 
         foreach ($period as $date) {
-            $dayName = $date->format('l'); // Full textual day of the week
-            if (in_array($dayName, $workingDaysConfig)) {
+            $dayKey = strtolower($date->format('D')); // Returns: 'Mon', 'Tue', etc. -> lowercase: 'mon', 'tue', ...
+            if (in_array($dayKey, $workingDaysConfig, true)) {
                 $totalWorkingDays++;
             }
         }
@@ -104,8 +111,7 @@ class EmployeeSalaryHistory extends Component
         // Count actual attendance days for this user in this month
         $attendanceDays = Attendance::where('user_id', $user->id)
             ->whereBetween('date', [$startOfMonth, $endOfMonth])
-            ->distinct('date')
-            ->count('date');
+            ->count();
 
         // Calculate prorated salary
         $dailySalary = $totalWorkingDays > 0 ? $monthlySalary / $totalWorkingDays : 0;
