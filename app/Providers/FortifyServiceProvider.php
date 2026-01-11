@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
+use Illuminate\Support\Facades\Event;
+use Laravel\Fortify\Events\Login as FortifyLogin;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -87,12 +89,42 @@ class FortifyServiceProvider extends ServiceProvider
                 ]);
             }
 
-            // DON'T mark token as used here - Fortify calls this multiple times
-            // Token will be marked as used after successful login
-            // $token->update(['used_at' => now(), 'user_id' => $user->id]);
+
+            // Store the validated token temporarily for post-login handling
+            request()->attributes->set('validated_employee_login_token', $tokenString);
             session()->forget('employee_login_token');
 
             return $user;
+        });
+
+        // After successful login, tie the session to the current QR version and mark token used
+        Event::listen(FortifyLogin::class, function (FortifyLogin $event) {
+            $user = $event->user;
+
+            // Admins are exempt from QR enforcement
+            if ($user->hasRole('admin')) {
+                return;
+            }
+
+            $tokenString = request()->attributes->get('validated_employee_login_token');
+
+            if ($tokenString) {
+                $token = EmployeeLoginToken::where('token', $tokenString)->first();
+
+                if ($token && $token->isValid()) {
+                    $token->update([
+                        'used_at' => now(),
+                        'user_id' => $user->id,
+                    ]);
+                }
+            }
+
+            $cachedQr = cache()->get('office_kiosk_qr');
+            $version = $cachedQr['version'] ?? null;
+
+            if ($version) {
+                session(['employee_qr_version' => $version]);
+            }
         });
     }
 

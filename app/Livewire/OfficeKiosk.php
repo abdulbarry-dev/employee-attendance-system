@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -35,11 +36,13 @@ class OfficeKiosk extends Component
         URL::forceRootUrl(config('app.url'));
 
         $expiresAt = now()->addMinutes(30);
+        $version = Str::uuid()->toString();
 
         // Generate a signed URL for token generation (valid for 30 minutes)
         $this->qrCodeUrl = URL::temporarySignedRoute(
             'auth.qr-token',
-            $expiresAt
+            $expiresAt,
+            ['v' => $version]
         );
 
         // Reset root URL to avoid affecting other links in the request lifecycle
@@ -51,6 +54,7 @@ class OfficeKiosk extends Component
         cache()->put('office_kiosk_qr', [
             'url' => $this->qrCodeUrl,
             'expires_at' => $expiresAt,
+            'version' => $version,
         ], $expiresAt);
     }
 

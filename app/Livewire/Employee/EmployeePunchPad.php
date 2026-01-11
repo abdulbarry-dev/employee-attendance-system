@@ -44,44 +44,88 @@ class EmployeePunchPad extends Component
         }
     }
 
+    private function checkInBlockReason(): ?string
+    {
+        $user = Auth::user();
+        $now = now();
+
+        if (!$user->shift_start || !$user->shift_end) {
+            return 'Your shift times are not configured. Contact your administrator.';
+        }
+
+        $workingDays = $user->working_days ?? ['mon', 'tue', 'wed', 'thu', 'fri'];
+        $workingDays = is_array($workingDays) ? array_map('strtolower', $workingDays) : ['mon', 'tue', 'wed', 'thu', 'fri'];
+
+        $shiftStart = Carbon::parse($user->shift_start);
+        $shiftEnd = Carbon::parse($user->shift_end);
+
+        $shiftDate = $now->copy();
+        $isNightShift = $shiftEnd->lt($shiftStart);
+
+        $todayShiftStart = $shiftStart->clone()->setDate($now->year, $now->month, $now->day);
+
+        if ($isNightShift && $now->hour < $shiftStart->hour) {
+            $todayShiftStart->subDay();
+            $shiftDate = $shiftDate->subDay();
+        }
+
+        $dayKey = strtolower($shiftDate->format('D'));
+
+        if (!in_array($dayKey, $workingDays, true)) {
+            return 'You cannot check in today because this is not one of your scheduled working days.';
+        }
+
+        if ($now->lt($todayShiftStart)) {
+            return 'You can check in at ' . $shiftStart->format('h:i A') . ' once your shift starts.';
+        }
+
+        return null;
+    }
+
     public function checkIn()
     {
         $user = Auth::user();
         $now = now();
 
+        // Require shift times to be configured
+        if (!$user->shift_start || !$user->shift_end) {
+            session()->flash('error', 'Your shift times are not configured. Contact your administrator.');
+            return;
+        }
+
         // If not configured, assume standard weekdays to prevent weekend check-ins by default
         $workingDays = $user->working_days ?? ['mon', 'tue', 'wed', 'thu', 'fri'];
 
-        $shiftStart = $user->shift_start ? Carbon::parse($user->shift_start) : null;
-        $shiftEnd = $user->shift_end ? Carbon::parse($user->shift_end) : null;
+        $shiftStart = Carbon::parse($user->shift_start);
+        $shiftEnd = Carbon::parse($user->shift_end);
 
         // Determine shift date (for night shifts, early morning belongs to previous day)
         $shiftDate = $now->copy();
 
-        if ($shiftStart && $shiftEnd) {
-            $isNightShift = $shiftEnd->lt($shiftStart);
+        $isNightShift = $shiftEnd->lt($shiftStart);
 
-            $todayShiftStart = $shiftStart->clone()->setDate($now->year, $now->month, $now->day);
+        $todayShiftStart = $shiftStart->clone()->setDate($now->year, $now->month, $now->day);
 
-            if ($isNightShift && $now->hour < $shiftStart->hour) {
-                $todayShiftStart->subDay();
-                $shiftDate = $shiftDate->subDay();
-            }
+        if ($isNightShift && $now->hour < $shiftStart->hour) {
+            $todayShiftStart->subDay();
+            $shiftDate = $shiftDate->subDay();
+        }
 
-            // Disallow check-in on non-working days (weekends or unscheduled days)
-            if (!empty($workingDays)) {
-                $dayKey = strtolower($shiftDate->format('D')); // sun, mon, tue, ...
-                if (!in_array($dayKey, $workingDays, true)) {
-                    session()->flash('error', 'You cannot check in today because this is not one of your scheduled working days.');
-                    return;
-                }
-            }
+        // Disallow check-in on non-working days (weekends or unscheduled days)
+        // Ensure working_days is an array (handle if it's null or empty)
+        $workingDays = is_array($workingDays) ? array_map('strtolower', $workingDays) : ['mon', 'tue', 'wed', 'thu', 'fri'];
 
-            // Check if it's too early to check in (before shift start)
-            if ($now->lt($todayShiftStart)) {
-                session()->flash('error', 'You cannot check in before your shift starts at ' . $shiftStart->format('h:i A'));
-                return;
-            }
+        $dayKey = strtolower($shiftDate->format('D')); // Returns: 'Sun', 'Mon', 'Tue', etc. -> lowercase: 'sun', 'mon', 'tue', ...
+
+        if (!in_array($dayKey, $workingDays, true)) {
+            session()->flash('error', 'You cannot check in today because this is not one of your scheduled working days.');
+            return;
+        }
+
+        // Check if it's too early to check in (before shift start)
+        if ($now->lt($todayShiftStart)) {
+            session()->flash('error', 'You cannot check in before your shift starts at ' . $shiftStart->format('h:i A'));
+            return;
         }
 
         // Validation: Verify Geo if needed (skipped for now, assumed frontend sends it)
@@ -160,6 +204,8 @@ class EmployeePunchPad extends Component
 
     public function render()
     {
-        return view('livewire.employee.employee-punch-pad');
+        return view('livewire.employee.employee-punch-pad', [
+            'checkInBlockReason' => $this->checkInBlockReason(),
+        ]);
     }
 }

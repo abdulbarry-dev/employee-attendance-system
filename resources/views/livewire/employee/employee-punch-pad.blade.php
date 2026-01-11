@@ -55,16 +55,24 @@
     <div class="space-y-4">
         @if(!$attendance)
             <!-- CHECK IN -->
+            @if($checkInBlockReason)
+                <div class="mb-4 rounded-xl border-2 border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800 dark:border-amber-900/30 dark:bg-amber-900/20 dark:text-amber-200">
+                    {{ $checkInBlockReason }}
+                </div>
+            @endif
+
             <button
                 wire:click="checkIn"
-                class="w-full group relative flex items-center justify-center gap-3 rounded-2xl bg-zinc-900 px-6 py-6 transition-all hover:bg-zinc-800 active:scale-95 dark:bg-white dark:hover:bg-zinc-200"
+                @if($checkInBlockReason) disabled aria-disabled="true" @endif
+                class="w-full group relative flex items-center justify-center gap-3 rounded-2xl px-6 py-6 transition-all active:scale-95
+                {{ $checkInBlockReason ? 'bg-zinc-300 text-zinc-500 cursor-not-allowed dark:bg-zinc-700 dark:text-zinc-400' : 'bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200' }}"
             >
-                <div class="rounded-full bg-white/20 p-2 dark:bg-zinc-900/10">
-                    <svg class="h-6 w-6 text-white dark:text-zinc-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="rounded-full p-2 {{ $checkInBlockReason ? 'bg-white/40 dark:bg-zinc-800/50' : 'bg-white/20 dark:bg-zinc-900/10' }}">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                     </svg>
                 </div>
-                <span class="text-xl font-bold text-white dark:text-zinc-900">{{ __('Check In') }}</span>
+                <span class="text-xl font-bold">{{ __('Check In') }}</span>
             </button>
 
         @elseif(!$attendance->check_out)
@@ -96,7 +104,7 @@
                 <div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
                     <button
                         x-data
-                        @click="$dispatch('open-modal', 'checkout-confirmation')"
+                        x-on:click="$dispatch('open-checkout-confirmation')"
                         class="w-full flex items-center justify-center gap-2 rounded-xl border-2 border-red-100 bg-red-50 p-4 text-red-600 transition-all hover:bg-red-100 hover:border-red-200 dark:bg-red-900/10 dark:border-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
                     >
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

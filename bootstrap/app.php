@@ -20,12 +20,14 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'fresh-employee-qr' => \App\Http\Middleware\EnsureFreshEmployeeQrSession::class,
         ]);
 
         // Append banned status check and employee token capture to web middleware stack
         $middleware->web(append: [
             CheckBannedStatus::class,
             \App\Http\Middleware\CaptureEmployeeToken::class,
+            \App\Http\Middleware\EnsureFreshEmployeeQrSession::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {})->create();
