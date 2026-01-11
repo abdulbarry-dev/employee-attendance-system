@@ -82,6 +82,43 @@ class EmployeePunchPad extends Component
         return null;
     }
 
+    private function resolveShiftEnd(): ?Carbon
+    {
+        $user = Auth::user();
+
+        if (!$this->attendance || !$user->shift_start || !$user->shift_end) {
+            return null;
+        }
+
+        $shiftStart = Carbon::parse($user->shift_start);
+        $shiftEnd = Carbon::parse($user->shift_end);
+        $checkInTime = $this->attendance->check_in ?? now();
+
+        $shiftStartDateTime = $shiftStart->copy()->setDate(
+            $checkInTime->year,
+            $checkInTime->month,
+            $checkInTime->day
+        );
+
+        $isNightShift = $shiftEnd->lt($shiftStart);
+
+        if ($isNightShift && $checkInTime->hour < $shiftStart->hour) {
+            $shiftStartDateTime->subDay();
+        }
+
+        $shiftEndDateTime = $shiftEnd->copy()->setDate(
+            $shiftStartDateTime->year,
+            $shiftStartDateTime->month,
+            $shiftStartDateTime->day
+        );
+
+        if ($isNightShift) {
+            $shiftEndDateTime->addDay();
+        }
+
+        return $shiftEndDateTime;
+    }
+
     public function checkIn()
     {
         $user = Auth::user();
@@ -152,6 +189,18 @@ class EmployeePunchPad extends Component
     public function checkOut()
     {
         if (!$this->attendance) return;
+
+        $shiftEndTime = $this->resolveShiftEnd();
+
+        if (!$shiftEndTime) {
+            session()->flash('error', 'Your shift times are not configured. Contact your administrator.');
+            return;
+        }
+
+        if (now()->lt($shiftEndTime)) {
+            session()->flash('error', 'You cannot check out before your shift ends at ' . $shiftEndTime->format('h:i A') . '.');
+            return;
+        }
 
         // Auto-close any open break
         if ($this->currentBreak) {
