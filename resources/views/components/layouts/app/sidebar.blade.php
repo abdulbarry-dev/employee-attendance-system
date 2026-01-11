@@ -38,6 +38,10 @@
                         <flux:sidebar.item icon="user-circle" :href="route('employee.profile')" :current="request()->routeIs('employee.profile')" wire:navigate>
                             {{ __('My Profile') }}
                         </flux:sidebar.item>
+
+                        <flux:sidebar.item icon="currency-dollar" :href="route('employee.salary-history')" :current="request()->routeIs('employee.salary-history')" wire:navigate>
+                            {{ __('Salary History') }}
+                        </flux:sidebar.item>
                     @endif
                 </flux:sidebar.group>
             </flux:sidebar.nav>

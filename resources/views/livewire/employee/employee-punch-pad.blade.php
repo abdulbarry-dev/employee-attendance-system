@@ -56,8 +56,11 @@
         @if(!$attendance)
             <!-- CHECK IN -->
             @if($checkInBlockReason)
-                <div class="mb-4 rounded-xl border-2 border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800 dark:border-amber-900/30 dark:bg-amber-900/20 dark:text-amber-200">
-                    {{ $checkInBlockReason }}
+                <div class="mb-4 flex items-start gap-3 rounded-xl border border-amber-400/70 bg-amber-50 p-4 text-sm font-semibold text-amber-900 shadow-sm dark:border-amber-400/50 dark:bg-amber-900/50 dark:text-amber-100">
+                    <svg class="h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span class="leading-relaxed text-sm font-semibold">{{ $checkInBlockReason }}</span>
                 </div>
             @endif
 
