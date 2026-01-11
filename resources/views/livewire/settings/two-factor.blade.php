@@ -22,7 +22,7 @@
 
                     <div class="flex justify-start">
                         <flux:button
-                            variant="danger"
+                            variant="negative"
                             icon="shield-exclamation"
                             icon:variant="outline"
                             wire:click="disable"
@@ -120,7 +120,7 @@
                 </div>
             @else
                 @error('setupData')
-                    <flux:callout variant="danger" icon="x-circle" heading="{{ $message }}"/>
+                    <flux:callout variant="warning" icon="x-circle" heading="{{ $message }}"/>
                 @enderror
 
                 <div class="flex justify-center">
