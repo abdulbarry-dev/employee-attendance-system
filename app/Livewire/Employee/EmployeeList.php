@@ -17,7 +17,7 @@ class EmployeeList extends Component
     public bool $showDeleteModal = false;
     public ?int $employeeIdToDelete = null;
 
-    #[\Livewire\Attributes\Computed]
+
     public function employees()
     {
         $this->authorize('viewAny', User::class);
@@ -88,7 +88,7 @@ class EmployeeList extends Component
     public function render()
     {
         return view('livewire.employee.employee-list', [
-            'employees' => $this->employees,
+            'employees' => $this->employees(),
         ]);
     }
 }
