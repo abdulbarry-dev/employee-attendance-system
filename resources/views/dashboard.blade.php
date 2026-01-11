@@ -14,14 +14,14 @@
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <!-- Total Employees -->
             <div class="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6">
-                <div class="flex items-center justify-between">
-                    <div>
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
                         <p class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Total Employees') }}</p>
                         <p class="mt-2 text-3xl font-bold text-zinc-900 dark:text-white">
                             {{ \App\Models\User::role('employee')->whereDoesntHave('roles', fn($q) => $q->where('name', 'admin'))->count() }}
                         </p>
                     </div>
-                    <div class="rounded-full bg-blue-100 p-3 dark:bg-blue-900/30">
+                    <div class="flex-shrink-0 rounded-full bg-blue-100 p-3 dark:bg-blue-900/30">
                         <svg class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
@@ -31,14 +31,14 @@
 
             <!-- Present Today -->
             <div class="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6">
-                <div class="flex items-center justify-between">
-                    <div>
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
                         <p class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Present Today') }}</p>
                         <p class="mt-2 text-3xl font-bold text-zinc-900 dark:text-white">
                             {{ \App\Models\Attendance::where('date', today())->where('status', 'present')->count() }}
                         </p>
                     </div>
-                    <div class="rounded-full bg-green-100 p-3 dark:bg-green-900/30">
+                    <div class="flex-shrink-0 rounded-full bg-green-100 p-3 dark:bg-green-900/30">
                         <svg class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -48,14 +48,14 @@
 
             <!-- On Break -->
             <div class="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6">
-                <div class="flex items-center justify-between">
-                    <div>
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
                         <p class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('On Break') }}</p>
                         <p class="mt-2 text-3xl font-bold text-zinc-900 dark:text-white">
                             {{ \App\Models\Attendance::where('date', today())->where('status', 'on_break')->count() }}
                         </p>
                     </div>
-                    <div class="rounded-full bg-amber-100 p-3 dark:bg-amber-900/30">
+                    <div class="flex-shrink-0 rounded-full bg-amber-100 p-3 dark:bg-amber-900/30">
                         <svg class="h-6 w-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -65,14 +65,14 @@
 
             <!-- Completed Shifts -->
             <div class="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 p-6">
-                <div class="flex items-center justify-between">
-                    <div>
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
                         <p class="text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Completed') }}</p>
                         <p class="mt-2 text-3xl font-bold text-zinc-900 dark:text-white">
                             {{ \App\Models\Attendance::where('date', today())->whereNotNull('check_out')->count() }}
                         </p>
                     </div>
-                    <div class="rounded-full bg-purple-100 p-3 dark:bg-purple-900/30">
+                    <div class="flex-shrink-0 rounded-full bg-purple-100 p-3 dark:bg-purple-900/30">
                         <svg class="h-6 w-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                         </svg>
