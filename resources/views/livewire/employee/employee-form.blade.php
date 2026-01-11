@@ -92,19 +92,23 @@
                 </div>
 
                 <div class="grid gap-6 md:grid-cols-2">
-                    <flux:input
-                        wire:model="shift_start"
-                        type="time"
-                        label="{{ __('Shift Start Time') }}"
-                        icon="clock"
-                    />
+                    <div>
+                        <flux:input
+                            wire:model="shift_start"
+                            type="time"
+                            label="{{ __('Shift Start Time') }}"
+                            icon="clock"
+                        />
+                    </div>
 
-                    <flux:input
-                        wire:model="shift_end"
-                        type="time"
-                        label="{{ __('Shift End Time') }}"
-                        icon="clock"
-                    />
+                    <div>
+                        <flux:input
+                            wire:model="shift_end"
+                            type="time"
+                            label="{{ __('Shift End Time') }}"
+                            icon="clock"
+                        />
+                    </div>
                 </div>
 
                 <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/30 dark:bg-amber-900/10">

@@ -61,7 +61,7 @@ class EmployeeForm extends Component
             'phone_number' => 'required|string|regex:/^(\+?[0-9]{1,3}[-.\s]?)?[0-9]{1,14}$/',
             'monthly_salary' => 'nullable|numeric|min:0|max:999999.99',
             'shift_start' => 'nullable|date_format:H:i',
-            'shift_end' => 'nullable|date_format:H:i|after:shift_start',
+            'shift_end' => 'nullable|date_format:H:i',
             'grace_period_minutes' => 'required|integer|min:0|max:120',
             'break_allowance_minutes' => 'required|integer|min:0|max:480',
             'working_days' => 'required|array',
