@@ -85,6 +85,14 @@ class EmployeeProfile extends Component
 
     public function render()
     {
-        return view('livewire.employee.employee-profile');
+        return view('livewire.employee.employee-profile', [
+            'employee' => $this->employee,
+            'penalties' => $this->penalties,
+            'workingDays' => $this->workingDays,
+            'totalPenaltyAmount' => $this->totalPenaltyAmount,
+            'netSalary' => $this->netSalary,
+            'selectedMonth' => $this->selectedMonth,
+            'selectedYear' => $this->selectedYear,
+        ]);
     }
 }

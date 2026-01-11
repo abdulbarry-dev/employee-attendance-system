@@ -49,21 +49,32 @@ class EmployeePunchPad extends Component
         $user = Auth::user();
         $now = now();
 
-        // Check if shift is configured
-        if ($user->shift_start) {
-            $shiftStart = Carbon::parse($user->shift_start);
-            $shiftEnd = Carbon::parse($user->shift_end);
+        // If not configured, assume standard weekdays to prevent weekend check-ins by default
+        $workingDays = $user->working_days ?? ['mon', 'tue', 'wed', 'thu', 'fri'];
 
-            // Handle night shift (shift end is earlier than shift start, spans midnight)
+        $shiftStart = $user->shift_start ? Carbon::parse($user->shift_start) : null;
+        $shiftEnd = $user->shift_end ? Carbon::parse($user->shift_end) : null;
+
+        // Determine shift date (for night shifts, early morning belongs to previous day)
+        $shiftDate = $now->copy();
+
+        if ($shiftStart && $shiftEnd) {
             $isNightShift = $shiftEnd->lt($shiftStart);
 
             $todayShiftStart = $shiftStart->clone()->setDate($now->year, $now->month, $now->day);
 
-            // For night shifts, if current time is very early (before shift start hour),
-            // it might be continuation of previous day's shift
             if ($isNightShift && $now->hour < $shiftStart->hour) {
-                // Employee is checking in early morning - should be from previous day's shift
                 $todayShiftStart->subDay();
+                $shiftDate = $shiftDate->subDay();
+            }
+
+            // Disallow check-in on non-working days (weekends or unscheduled days)
+            if (!empty($workingDays)) {
+                $dayKey = strtolower($shiftDate->format('D')); // sun, mon, tue, ...
+                if (!in_array($dayKey, $workingDays, true)) {
+                    session()->flash('error', 'You cannot check in today because this is not one of your scheduled working days.');
+                    return;
+                }
             }
 
             // Check if it's too early to check in (before shift start)
