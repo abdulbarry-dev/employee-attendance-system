@@ -51,6 +51,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/employee/punch', \App\Livewire\Employee\EmployeePunchPad::class)
         ->name('employee.punch');
 
+    // Employee profile and information
+    Route::get('/employee/profile', \App\Livewire\Employee\EmployeeProfile::class)
+        ->name('employee.profile');
+
     // Route for scanning QR codes (signed required)
     Route::get('/attendance/punch', \App\Livewire\Employee\EmployeePunchPad::class)
         ->name('attendance.punch')

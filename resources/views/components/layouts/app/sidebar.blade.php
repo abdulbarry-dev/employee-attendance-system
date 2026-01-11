@@ -34,6 +34,10 @@
                         <flux:sidebar.item icon="clock" :href="route('employee.punch')" :current="request()->routeIs('employee.punch')" wire:navigate>
                             {{ __('My Attendance') }}
                         </flux:sidebar.item>
+
+                        <flux:sidebar.item icon="user-circle" :href="route('employee.profile')" :current="request()->routeIs('employee.profile')" wire:navigate>
+                            {{ __('My Profile') }}
+                        </flux:sidebar.item>
                     @endif
                 </flux:sidebar.group>
             </flux:sidebar.nav>

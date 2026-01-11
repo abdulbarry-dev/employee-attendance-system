@@ -120,22 +120,24 @@
                 {{ __('Are you sure you want to check out? This will end your current shift.') }}
             </p>
 
-            <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-4 mb-6">
-                <div class="flex justify-between items-center text-sm">
-                    <span class="text-zinc-600 dark:text-zinc-400">{{ __('Check-in Time') }}</span>
-                    <span class="font-mono font-semibold text-zinc-900 dark:text-white">{{ $attendance->check_in->format('H:i') }}</span>
+            @if($attendance && $attendance->check_in)
+                <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-4 mb-6">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-zinc-600 dark:text-zinc-400">{{ __('Check-in Time') }}</span>
+                        <span class="font-mono font-semibold text-zinc-900 dark:text-white">{{ $attendance->check_in->format('H:i') }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm mt-2">
+                        <span class="text-zinc-600 dark:text-zinc-400">{{ __('Current Time') }}</span>
+                        <span class="font-mono font-semibold text-zinc-900 dark:text-white">{{ now()->format('H:i') }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
+                        <span class="text-zinc-600 dark:text-zinc-400">{{ __('Work Duration') }}</span>
+                        <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                            {{ intdiv(now()->diffInMinutes($attendance->check_in), 60) }}h {{ now()->diffInMinutes($attendance->check_in) % 60 }}m
+                        </span>
+                    </div>
                 </div>
-                <div class="flex justify-between items-center text-sm mt-2">
-                    <span class="text-zinc-600 dark:text-zinc-400">{{ __('Current Time') }}</span>
-                    <span class="font-mono font-semibold text-zinc-900 dark:text-white">{{ now()->format('H:i') }}</span>
-                </div>
-                <div class="flex justify-between items-center text-sm mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
-                    <span class="text-zinc-600 dark:text-zinc-400">{{ __('Work Duration') }}</span>
-                    <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                        {{ intdiv(now()->diffInMinutes($attendance->check_in), 60) }}h {{ now()->diffInMinutes($attendance->check_in) % 60 }}m
-                    </span>
-                </div>
-            </div>
+            @endif
 
             <div class="flex gap-3">
                 <button
