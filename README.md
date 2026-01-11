@@ -27,19 +27,33 @@ Built with **Laravel 12**, **Livewire 3**, and **Flux UI**, the system provides 
 
 ### Security & Authentication
 
-- QR Code Authentication - Secure employee login via office kiosk QR codes
+- QR Code Authentication - Secure employee login via office kiosk QR codes with token versioning
 - Two-Factor Authentication - Enhanced security with TOTP-based 2FA
 - Geolocation Tracking - Record check-in/check-out location data
 - Token-Based Sessions - Tokens marked as used after login to prevent reuse
+- Session Versioning - QR codes expire and refresh every 30 minutes for enhanced security
 - Role-Based Access Control - Admin and employee role separation
+- Account Suspension - Ban/unban functionality with detailed suspension reasons
 
 ### Attendance Management
 
-- Real-Time Check-In/Check-Out - Instant time recording
-- Break Management - Track lunch and break periods
-- Shift Duration Calculation - Automatic work hour computation
+- Real-Time Check-In/Check-Out - Instant time recording with shift validation
+- Break Management - Track lunch and break periods with overage tracking
+- Shift Duration Calculation - Automatic work hour computation with night shift support
 - Attendance History - Complete audit trail of employee time records
 - Status Dashboard - Live monitoring of employee attendance
+- Attendance Blocking - Prevent early check-ins before shift start time
+
+### Salary & Compensation Tracking
+
+- Prorated Salary Calculation - Automatic salary calculation based on days worked
+- Fixed vs. Working Salary Display - Clear separation of base salary and prorated earnings
+- Penalty Tracking - Automatic deduction calculation for late arrivals and break overages
+- Net Salary Display - Final take-home amount after all deductions
+- Salary History - Monthly salary records with penalties and deductions
+- Registration Date Indicator - Visual badge showing employee start date
+- Working Days Management - Configure employee working days per week
+- Grace Period Configuration - Set allowance for late arrivals per employee
 
 ### Monitoring & Reporting
 
@@ -47,14 +61,19 @@ Built with **Laravel 12**, **Livewire 3**, and **Flux UI**, the system provides 
 - Attendance Monitor - Comprehensive view of all employee activities
 - Historical Data - Query and export attendance records
 - Statistics Dashboard - Present/absent/on-break metrics
+- Monthly Salary Overview - Aggregate salary and penalty data
+- Detailed Penalty Reports - Track late arrivals and break violations
 - Automated Reports - Scheduled attendance reports
 
 ### Employee Management
 
 - Employee Profiles - Manage employee information and contacts
 - Account Creation - Automatic welcome emails with setup instructions
-- Employee Suspension - Ban/unban functionality
+- Employee Suspension - Suspend accounts with detailed reason tracking
+- Ban Reason Recording - Document suspension reasons visible to employees
+- Suspension Timeline - Track suspension dates and reasons
 - Access Control - Restrict employee access when needed
+- Ban Status Messages - Clear, user-friendly messages for suspended accounts
 
 ### Settings & Customization
 
@@ -62,6 +81,7 @@ Built with **Laravel 12**, **Livewire 3**, and **Flux UI**, the system provides 
 - Password Management - Secure password updates
 - Appearance Settings - Light/dark/system theme support
 - Recovery Codes - 2FA backup codes for account recovery
+- Shift Configuration - Configure working hours and break allowances
 
 ### Multi-Language Support
 
@@ -244,11 +264,34 @@ LOG_LEVEL=warning          # debug|info|warning|error
 
 The application uses Laravel migrations. Default models:
 
-- **User** - Admin and employee accounts
-- **Attendance** - Check-in/check-out records
-- **AttendanceBreak** - Break/lunch periods
-- **EmployeeLoginToken** - QR code tokens
-- **Role & Permission** - Spatie Laravel Permission
+- **User** - Admin and employee accounts with salary, shift, and ban fields
+  - `monthly_salary` - Base monthly salary amount
+  - `shift_start` - Employee shift start time
+  - `shift_end` - Employee shift end time
+  - `working_days` - JSON array of working days (e.g., ['mon', 'tue', 'wed', 'thu', 'fri'])
+  - `grace_period_minutes` - Late arrival grace period
+  - `break_allowance_minutes` - Allowed break time
+  - `is_banned` - Account suspension status
+  - `ban_reason` - Reason for suspension (optional)
+  - `banned_at` - Timestamp when account was suspended
+
+- **Attendance** - Check-in/check-out records with date and user tracking
+
+- **AttendanceBreak** - Break/lunch periods with duration tracking
+
+- **EmployeePenalty** - Penalty records for late arrivals and break overages
+  - `type` - Penalty type (late/break)
+  - `minutes_late` - Minutes late from shift start
+  - `break_overage_minutes` - Minutes over allowed break
+  - `penalty_amount` - Calculated penalty amount
+
+- **EmployeeLoginToken** - QR code tokens with expiration and usage tracking
+  - `token` - Random 64-character token string
+  - `user_id` - Associated employee (nullable until used)
+  - `expires_at` - Token expiration timestamp (5 minutes)
+  - `used_at` - When token was used for login
+
+- **Role & Permission** - Spatie Laravel Permission for RBAC
 
 ---
 
@@ -264,36 +307,114 @@ The application uses Laravel migrations. Default models:
 2. **Manage Employees**
    - Go to `/employees`
    - Create new employee accounts
-   - View employee details
-   - Ban/unban accounts as needed
+   - View employee details and status
+   - Edit employee shift configuration
+   - Configure working days and shift hours
+   - Set grace period for late arrivals
 
-3. **Monitor Attendance**
+3. **Suspend/Ban Employees**
+   - Go to `/employees` and click the ban button on an employee
+   - Modal appears requesting suspension reason
+   - Provide clear reason (e.g., "Policy violation", "Misconduct")
+   - Reason displayed to employee when they attempt to login
+   - Click "Unban" button to restore account access
+   - All suspension data (reason, date) automatically recorded
+
+4. **Monitor Attendance**
    - View real-time activity feed at `/attendance/monitor`
    - Check attendance history at `/attendance/history`
    - Review employee check-in/out records
+   - Filter by date range and employee
 
-4. **Setup Office Kiosk**
+5. **View Salary Records**
+   - Access `/salary-history` to view monthly salary data
+   - See breakdown of:
+     - Fixed monthly salary (base amount)
+     - Working salary (prorated for days worked)
+     - Penalties (late arrivals, break overages)
+     - Net salary (final take-home amount)
+   - View historical monthly records with penalties
+
+6. **Setup Office Kiosk**
    - Access `/office-kiosk`
    - Display QR code on kiosk display
    - QR code auto-refreshes every 30 minutes
+   - Tokens expire after 5 minutes of generation
 
 ### For Employees
 
 1. **Check In/Out**
    - Navigate to `/employee/punch`
+   - System validates shift configuration before allowing check-in
+   - Cannot check-in before shift start time (displays helpful warning)
+   - Only allowed to check-in on configured working days
    - Click "Check In" to start shift
-   - Click "Start Break" for lunch
+   - Click "Start Break" for lunch or breaks
    - Click "Check Out" to end shift
+   - Penalties automatically calculated for late arrivals and break overages
 
 2. **View Attendance**
    - Check shift duration on punch pad
-   - View all recorded breaks
+   - View all recorded breaks with durations
+   - See total working hours for the day
 
-3. **Manage Settings**
+3. **View Salary History**
+   - Navigate to `/salary-history`
+   - See employee registration date (blue indicator badge)
+   - View current month salary breakdown:
+     - Fixed Monthly Salary - Your base salary
+     - Your Salary - Amount for working days this month
+     - Penalties Deducted - Deductions that will be subtracted
+     - Net Salary - Final amount after deductions
+   - View detailed breakdown with tooltip showing:
+     - Days worked vs. total working days
+     - Daily rate calculation
+     - Penalty details (late minutes, break overages)
+   - Browse previous months (restricted to registered period)
+   - Cannot navigate before registration date
+
+4. **Manage Settings**
    - Update profile at `/profile`
    - Change password at `/user-password`
    - Enable 2FA at `/two-factor`
    - Customize appearance theme
+   - View account status
+
+5. **Account Suspension**
+   - If account is suspended, login page displays:
+     - Suspension reason provided by admin
+     - Date account was suspended
+     - Message to contact administrator
+   - Contact administrator for account reinstatement
+
+---
+
+## Login & Authentication
+
+### Employee Login Flow
+
+1. Employee scans QR code displayed on office kiosk
+2. QR code contains secure token valid for 5 minutes
+3. Employee navigates to login page with token
+4. System validates credentials and token
+5. Checks if account is suspended (shows reason if banned)
+6. Validates working days and shift configuration
+7. Session created and linked to QR version
+8. Token marked as used (cannot be reused)
+
+### Ban Status Messages
+
+When a banned employee attempts to login, they see a clear error message:
+
+```
+Your account has been suspended. Reason: Policy violation (Suspended on January 11, 2026)
+```
+
+Or if no reason provided:
+
+```
+Your account has been suspended on January 11, 2026. Please contact the administrator for assistance.
+```
 
 ---
 
@@ -436,13 +557,25 @@ php artisan route:clear
 - Input Validation - All user inputs validated and sanitized
 - CSRF Protection - Laravel CSRF token validation
 - Password Hashing - bcrypt with configurable rounds
-- Session Security - Secure session management
+- Session Security - Secure session management with version tracking
 - Two-Factor Authentication - TOTP-based 2FA
 - Rate Limiting - Login attempt throttling
 - Authorization - Role-based access control
 - SQL Injection Prevention - Eloquent ORM parameterized queries
 - XSS Protection - Blade template escaping
 - Geolocation Privacy - Optional geolocation recording
+- QR Token Security - Tokens expire after 5 minutes, marked as used after login
+- QR Version Control - Session tied to QR version refreshed every 30 minutes
+- Account Suspension - Ban system with detailed reason tracking
+- Ban Enforcement - Blocks login with clear status messages
+
+### Account Suspension Security
+
+- Suspended accounts cannot login regardless of password validity
+- Ban status checked before QR token validation
+- Suspension reasons logged with timestamp
+- Admin can track ban history and restore accounts
+- Employees see transparent suspension messages
 
 ### Security Recommendations
 
@@ -453,6 +586,8 @@ php artisan route:clear
 5. **Regular backups** - Backup database and files daily
 6. **Monitor logs** - Review error and access logs
 7. **Update PHP** - Keep PHP and extensions current
+8. **Review ban logs** - Monitor account suspensions
+9. **Audit QR tokens** - Review token usage patterns
 
 ---
 
@@ -471,6 +606,28 @@ php artisan route:clear
 - Tokens expire after 5 minutes
 - User should re-scan QR code
 - QR code auto-refreshes every 30 minutes
+
+### Authentication Issues
+
+**Q: Employee sees ban message at login?**
+
+- Account is suspended by administrator
+- Contact admin to view suspension reason
+- Check if temporary suspension (time-based)
+- Request account reinstatement from admin
+
+**Q: Employee cannot check-in before shift start?**
+
+- This is intentional - prevents early clock-in
+- Shift configuration set by admin
+- Displays helpful warning message
+- Try again after shift start time
+
+**Q: Employee cannot check-in on non-working days?**
+
+- Shift not configured for that day
+- Check working days configuration
+- Contact admin to add day to working schedule
 
 ### Database Issues
 
@@ -560,6 +717,19 @@ Fixes #issue_number
 
 ## Roadmap
 
+### Completed Features
+
+- [x] **QR Code Authentication** - Secure employee login with token versioning
+- [x] **Attendance Tracking** - Real-time check-in/check-out with breaks
+- [x] **Prorated Salary Calculation** - Automatic salary based on working days
+- [x] **Salary History** - Monthly breakdown with penalties and deductions
+- [x] **Penalty Tracking** - Automatic deduction for late arrivals and break overages
+- [x] **Account Suspension** - Ban system with detailed reason tracking
+- [x] **Two-Factor Authentication** - TOTP-based 2FA with recovery codes
+- [x] **Geolocation Tracking** - Optional location recording for attendance
+- [x] **Role-Based Access Control** - Admin and employee role separation
+- [x] **Shift Validation** - Prevent early check-ins and non-working day access
+
 ### Planned Features
 
 - [ ] **Mobile App** - Native iOS/Android attendance app
@@ -569,8 +739,9 @@ Fixes #issue_number
 - [ ] **Payroll Integration** - Connect with payroll systems
 - [ ] **Email Reports** - Scheduled automated reports
 - [ ] **Calendar View** - Interactive attendance calendar
-- [ ] **Holiday Management** - Configure company holidays
-- [ ] **Shift Scheduling** - Assign employee shifts
+- [ ] **Holiday Management** - Configure company holidays and off-days
+- [ ] **Overtime Tracking** - Track and calculate overtime hours
+
 - [ ] **Mobile Responsive** - Full mobile optimization
 
 ---
