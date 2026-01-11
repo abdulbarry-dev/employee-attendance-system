@@ -1,4 +1,4 @@
-# Arena Système Pointage
+# Attendance Employee System
 
 <div align="center">
 
@@ -9,7 +9,7 @@
 [![Laravel](https://img.shields.io/badge/Laravel-%5E11.0-red.svg)](https://laravel.com/)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](#)
 
-[Features](#features) • [Quick Start](#quick-start) • [Architecture](#architecture) • [Documentation](#documentation) • [Contributing](#contributing)
+[Features](#features) • [Quick Start](#quick-start) • [Architecture](#architecture) • [Development](#development) • [Contributing](#contributing)
 
 </div>
 
@@ -17,7 +17,7 @@
 
 ## Overview
 
-Arena Système Pointage is a sophisticated employee attendance and time-tracking platform designed for modern workplaces. It combines real-time monitoring, secure authentication, and comprehensive reporting capabilities to streamline workforce management.
+Attendance Employee System is a sophisticated employee attendance and time-tracking platform designed for modern workplaces. It combines real-time monitoring, secure authentication, and comprehensive reporting capabilities to streamline workforce management.
 
 Built with **Laravel 11**, **Livewire 3**, and **Flux UI**, the system provides a seamless experience for both administrators and employees with a focus on security, reliability, and user experience.
 
@@ -85,8 +85,8 @@ Built with **Laravel 11**, **Livewire 3**, and **Flux UI**, the system provides 
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/yourusername/arena-systeme-pointage.git
-   cd arena-systeme-pointage
+   git clone https://github.com/yourusername/attendance-employee-system.git
+   cd attendance-employee-system
    ```
 
 2. **Install dependencies**
@@ -151,7 +151,7 @@ After seeding, test with:
 ### Directory Structure
 
 ```
-arena-systeme-pointage/
+attendance-employee-system/
 ├── app/
 │   ├── Http/
 │   │   ├── Controllers/      # API & specialized controllers
@@ -215,7 +215,7 @@ LoginResponse → Session Created → Dashboard/Punch Pad
 
 ```env
 # Application
-APP_NAME=Arena Système Pointage
+APP_NAME=Attendance Employee System
 APP_ENV=production          # local|production|testing
 APP_DEBUG=false             # Always false in production
 APP_URL=https://example.com # Your domain
@@ -612,8 +612,8 @@ Built with:
 
 <div align="center">
 
-**Made with dedication by the Arena Team**
+**Made with dedication by the Development Team**
 
-[⬆ Back to top](#arena-système-pointage)
+[⬆ Back to top](#attendance-employee-system)
 
 </div>
