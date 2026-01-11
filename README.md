@@ -6,7 +6,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![PHP Version](https://img.shields.io/badge/php-%5E8.2-blue.svg)](https://www.php.net/)
-[![Laravel](https://img.shields.io/badge/Laravel-%5E11.0-red.svg)](https://laravel.com/)
+[![Laravel](https://img.shields.io/badge/Laravel-%5E12.0-red.svg)](https://laravel.com/)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](#)
 
 [Features](#features) • [Quick Start](#quick-start) • [Architecture](#architecture) • [Development](#development) • [Contributing](#contributing)
@@ -19,7 +19,7 @@
 
 Attendance Employee System is a sophisticated employee attendance and time-tracking platform designed for modern workplaces. It combines real-time monitoring, secure authentication, and comprehensive reporting capabilities to streamline workforce management.
 
-Built with **Laravel 11**, **Livewire 3**, and **Flux UI**, the system provides a seamless experience for both administrators and employees with a focus on security, reliability, and user experience.
+Built with **Laravel 12**, **Livewire 3**, and **Flux UI**, the system provides a seamless experience for both administrators and employees with a focus on security, reliability, and user experience.
 
 ---
 
@@ -139,7 +139,7 @@ After seeding, test with:
 
 | Layer | Technology |
 |-------|-----------|
-| **Backend Framework** | Laravel 11 |
+| **Backend Framework** | Laravel 12 |
 | **Frontend Framework** | Livewire 3 + Alpine.js |
 | **UI Component Library** | Flux UI |
 | **Styling** | Tailwind CSS |
