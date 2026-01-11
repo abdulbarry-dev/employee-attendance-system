@@ -65,78 +65,93 @@
 
             <flux:separator />
 
-            <div class="grid gap-6 md:grid-cols-2">
-                <flux:input
-                    wire:model="monthly_salary"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    label="{{ __('Monthly Salary') }}"
-                    placeholder="0.00"
-                    icon="currency-dollar"
-                />
+            <!-- Salary & Shift Section -->
+            <div class="space-y-4">
+                <flux:heading size="sm">{{ __('Salary & Schedule') }}</flux:heading>
 
-                <flux:input
-                    wire:model="grace_period_minutes"
-                    type="number"
-                    min="0"
-                    max="120"
-                    label="{{ __('Grace Period (minutes)') }}"
-                    placeholder="10"
-                    icon="clock"
-                />
-            </div>
+                <div class="grid gap-6 md:grid-cols-2">
+                    <flux:input
+                        wire:model="monthly_salary"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        label="{{ __('Monthly Salary') }}"
+                        placeholder="0.00"
+                        icon="currency-dollar"
+                    />
 
-            <div class="grid gap-6 md:grid-cols-2">
-                <flux:input
-                    wire:model="shift_start"
-                    type="time"
-                    label="{{ __('Shift Start') }}"
-                    icon="clock"
-                />
-
-                <flux:input
-                    wire:model="shift_end"
-                    type="time"
-                    label="{{ __('Shift End') }}"
-                    icon="clock"
-                />
-            </div>
-
-            <div class="grid gap-6 md:grid-cols-2">
-                <flux:input
-                    wire:model="break_allowance_minutes"
-                    type="number"
-                    min="0"
-                    max="480"
-                    label="{{ __('Daily Break Allowance (minutes)') }}"
-                    placeholder="60"
-                    icon="pause-circle"
-                />
-            </div>
-
-            <div class="space-y-3">
-                <div class="flex items-center justify-between">
-                    <flux:heading size="sm">{{ __('Working Days (Sun → Sat)') }}</flux:heading>
-                    <span class="text-xs text-zinc-500 dark:text-zinc-400">{{ __('Select days this employee is scheduled to work') }}</span>
+                    <flux:input
+                        wire:model="grace_period_minutes"
+                        type="number"
+                        min="0"
+                        max="120"
+                        label="{{ __('Grace Period (minutes)') }}"
+                        placeholder="10"
+                        icon="clock"
+                    />
                 </div>
-                <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-7">
+
+                <div class="grid gap-6 md:grid-cols-2">
+                    <flux:input
+                        wire:model="shift_start"
+                        type="time"
+                        label="{{ __('Shift Start Time') }}"
+                        icon="clock"
+                    />
+
+                    <flux:input
+                        wire:model="shift_end"
+                        type="time"
+                        label="{{ __('Shift End Time') }}"
+                        icon="clock"
+                    />
+                </div>
+
+                <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/30 dark:bg-amber-900/10">
+                    <p class="text-xs leading-relaxed text-amber-900 dark:text-amber-300">
+                        <strong class="font-semibold">{{ __('Night Shifts:') }}</strong>
+                        {{ __('For shifts spanning midnight (e.g., 7pm to 4am), the end time will be earlier than start time. The system will automatically adjust lateness detection.') }}
+                    </p>
+                </div>
+
+                <div>
+                    <flux:input
+                        wire:model="break_allowance_minutes"
+                        type="number"
+                        min="0"
+                        max="480"
+                        label="{{ __('Daily Break Allowance (minutes)') }}"
+                        placeholder="60"
+                        icon="pause-circle"
+                    />
+                </div>
+            </div>
+
+            <!-- Working Days Section -->
+            <div class="space-y-4">
+                <div>
+                    <flux:heading size="sm">{{ __('Working Days') }}</flux:heading>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{{ __('Select the days this employee is scheduled to work') }}</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-7 p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50">
                     @php($days = [
-                        'sun' => __('Sun'),
-                        'mon' => __('Mon'),
-                        'tue' => __('Tue'),
-                        'wed' => __('Wed'),
-                        'thu' => __('Thu'),
-                        'fri' => __('Fri'),
-                        'sat' => __('Sat'),
+                        'sun' => __('Sunday'),
+                        'mon' => __('Monday'),
+                        'tue' => __('Tuesday'),
+                        'wed' => __('Wednesday'),
+                        'thu' => __('Thursday'),
+                        'fri' => __('Friday'),
+                        'sat' => __('Saturday'),
                     ])
 
                     @foreach($days as $value => $label)
-                        <flux:checkbox
-                            wire:model="working_days"
-                            value="{{ $value }}"
-                            label="{{ $label }}"
-                        />
+                        <div class="flex items-center">
+                            <flux:checkbox
+                                wire:model="working_days"
+                                value="{{ $value }}"
+                                label="{{ substr($label, 0, 3) }}"
+                            />
+                        </div>
                     @endforeach
                 </div>
             </div>

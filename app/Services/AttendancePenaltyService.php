@@ -24,8 +24,19 @@ class AttendancePenaltyService
             return null; // no shift configured, skip penalties
         }
 
-        $allowedStart = Carbon::parse($user->shift_start)->setDate($date->year, $date->month, $date->day);
+        $shiftStart = Carbon::parse($user->shift_start);
+        $shiftEnd = Carbon::parse($user->shift_end);
+
+        // Handle night shift (shift end is earlier than shift start, spans midnight)
+        $isNightShift = $shiftEnd->lt($shiftStart);
+
+        $allowedStart = $shiftStart->clone()->setDate($date->year, $date->month, $date->day);
         $allowedStart->addMinutes($user->grace_period_minutes ?? 0);
+
+        // If night shift and check-in is very early morning, use previous day's shift time
+        if ($isNightShift && $checkIn->hour < $shiftStart->hour) {
+            $allowedStart->subDay();
+        }
 
         if ($checkIn->lte($allowedStart)) {
             return null; // on time
