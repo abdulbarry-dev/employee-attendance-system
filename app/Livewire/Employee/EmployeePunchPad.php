@@ -46,6 +46,33 @@ class EmployeePunchPad extends Component
 
     public function checkIn()
     {
+        $user = Auth::user();
+        $now = now();
+
+        // Check if shift is configured
+        if ($user->shift_start) {
+            $shiftStart = Carbon::parse($user->shift_start);
+            $shiftEnd = Carbon::parse($user->shift_end);
+
+            // Handle night shift (shift end is earlier than shift start, spans midnight)
+            $isNightShift = $shiftEnd->lt($shiftStart);
+
+            $todayShiftStart = $shiftStart->clone()->setDate($now->year, $now->month, $now->day);
+
+            // For night shifts, if current time is very early (before shift start hour),
+            // it might be continuation of previous day's shift
+            if ($isNightShift && $now->hour < $shiftStart->hour) {
+                // Employee is checking in early morning - should be from previous day's shift
+                $todayShiftStart->subDay();
+            }
+
+            // Check if it's too early to check in (before shift start)
+            if ($now->lt($todayShiftStart)) {
+                session()->flash('error', 'You cannot check in before your shift starts at ' . $shiftStart->format('h:i A'));
+                return;
+            }
+        }
+
         // Validation: Verify Geo if needed (skipped for now, assumed frontend sends it)
 
         $this->attendance = Attendance::create([
