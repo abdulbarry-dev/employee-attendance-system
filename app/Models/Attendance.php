@@ -30,4 +30,16 @@ class Attendance extends Model
     {
         return $this->hasMany(AttendanceBreak::class);
     }
+
+    /**
+     * Calculate total break duration in minutes
+     */
+    public function getTotalBreakDurationAttribute()
+    {
+        return $this->breaks
+            ->whereNotNull('ended_at')
+            ->sum(function ($break) {
+                return $break->ended_at->diffInMinutes($break->started_at);
+            });
+    }
 }

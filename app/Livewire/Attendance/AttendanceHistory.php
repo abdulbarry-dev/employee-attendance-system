@@ -17,10 +17,10 @@ class AttendanceHistory extends Component
 
     public function render()
     {
-        $attendances = Attendance::with('user')
+        $attendances = Attendance::with(['user', 'breaks'])
             ->latest('date')
             ->latest('check_in')
-            ->paginate(15);
+            ->paginate(5);
 
         return view('livewire.attendance.attendance-history', [
             'attendances' => $attendances

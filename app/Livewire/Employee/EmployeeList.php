@@ -39,7 +39,7 @@ class EmployeeList extends Component
                 }
             })
             ->latest()
-            ->paginate(10);
+            ->paginate(5);
     }
 
     public function updatedSearch()

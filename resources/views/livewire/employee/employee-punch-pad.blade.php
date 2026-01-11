@@ -72,8 +72,8 @@
 
                 <div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
                     <button
-                        wire:click="checkOut"
-                        wire:confirm="{{ __('Are you sure you want to end your shift?') }}"
+                        x-data
+                        @click="$dispatch('open-modal', 'checkout-confirmation')"
                         class="w-full flex items-center justify-center gap-2 rounded-xl border-2 border-red-100 bg-red-50 p-4 text-red-600 transition-all hover:bg-red-100 hover:border-red-200 dark:bg-red-900/10 dark:border-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
                     >
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -100,6 +100,62 @@
             </div>
         @endif
     </div>
+
+    <!-- Checkout Confirmation Modal -->
+    <x-modal name="checkout-confirmation" :show="false" maxWidth="sm">
+        <div class="p-6">
+            <div class="flex items-center justify-center mb-4">
+                <div class="rounded-full bg-red-100 p-3 dark:bg-red-900/30">
+                    <svg class="h-8 w-8 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </div>
+            </div>
+
+            <h2 class="text-center text-xl font-bold text-zinc-900 dark:text-white mb-2">
+                {{ __('End Your Shift?') }}
+            </h2>
+
+            <p class="text-center text-zinc-600 dark:text-zinc-400 mb-6">
+                {{ __('Are you sure you want to check out? This will end your current shift.') }}
+            </p>
+
+            <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-4 mb-6">
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-zinc-600 dark:text-zinc-400">{{ __('Check-in Time') }}</span>
+                    <span class="font-mono font-semibold text-zinc-900 dark:text-white">{{ $attendance->check_in->format('H:i') }}</span>
+                </div>
+                <div class="flex justify-between items-center text-sm mt-2">
+                    <span class="text-zinc-600 dark:text-zinc-400">{{ __('Current Time') }}</span>
+                    <span class="font-mono font-semibold text-zinc-900 dark:text-white">{{ now()->format('H:i') }}</span>
+                </div>
+                <div class="flex justify-between items-center text-sm mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
+                    <span class="text-zinc-600 dark:text-zinc-400">{{ __('Work Duration') }}</span>
+                    <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                        {{ intdiv(now()->diffInMinutes($attendance->check_in), 60) }}h {{ now()->diffInMinutes($attendance->check_in) % 60 }}m
+                    </span>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button
+                    x-on:click="$dispatch('close')"
+                    type="button"
+                    class="flex-1 rounded-lg border-2 border-zinc-200 bg-white px-4 py-3 font-semibold text-zinc-700 transition-all hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                >
+                    {{ __('Cancel') }}
+                </button>
+                <button
+                    wire:click="checkOut"
+                    x-on:click="$dispatch('close')"
+                    type="button"
+                    class="flex-1 rounded-lg bg-red-600 px-4 py-3 font-semibold text-white transition-all hover:bg-red-700 active:scale-95"
+                >
+                    {{ __('Check Out') }}
+                </button>
+            </div>
+        </div>
+    </x-modal>
 
     <!-- Geolocation -->
     <script>

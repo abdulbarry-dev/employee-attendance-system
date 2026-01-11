@@ -5,14 +5,14 @@
     </div>
 
     <div class="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
+        <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
                 <thead class="bg-zinc-50 dark:bg-zinc-800">
                     <tr>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{{ __('Employee') }}</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{{ __('Date') }}</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{{ __('Check In') }}</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{{ __('Check Out') }}</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{{ __('Break Time') }}</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{{ __('Duration') }}</th>
 
                     </tr>
@@ -40,6 +40,15 @@
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-zinc-500 dark:text-zinc-400">
                                 {{ $attendance->check_out ? $attendance->check_out->format('H:i') : '--:--' }}
                             </td>
+                            <td class="whitespace-nowrap px-6 py-4 text-sm font-mono">
+                                @if($attendance->total_break_duration > 0)
+                                    <span class="text-amber-600 dark:text-amber-400">
+                                        {{ intdiv($attendance->total_break_duration, 60) }}h {{ $attendance->total_break_duration % 60 }}m
+                                    </span>
+                                @else
+                                    <span class="text-zinc-400 dark:text-zinc-600">-</span>
+                                @endif
+                            </td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-zinc-500 dark:text-zinc-400 font-mono">
                                 @if($attendance->work_duration)
                                     {{ intdiv($attendance->work_duration, 60) }}h {{ $attendance->work_duration % 60 }}m
@@ -51,16 +60,15 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-zinc-500 dark:text-zinc-400">
+                            <td colspan="6" class="px-6 py-12 text-center text-zinc-500 dark:text-zinc-400">
                                 {{ __('No attendance records found.') }}
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
-        </div>
     </div>
-    
+
     <div class="mt-4">
         {{ $attendances->links() }}
     </div>
