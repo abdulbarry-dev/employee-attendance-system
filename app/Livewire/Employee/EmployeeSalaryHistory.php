@@ -20,8 +20,30 @@ class EmployeeSalaryHistory extends Component
 
     public function mount()
     {
-        $this->selectedMonth = now()->month;
-        $this->selectedYear = now()->year;
+        $user = Auth::user();
+
+        // Get first attendance date to determine initial month
+        $firstAttendance = Attendance::where('user_id', $user->id)
+            ->oldest('date')
+            ->first();
+
+        // Start with current month, but if it's before registration, start with registration month
+        if ($firstAttendance) {
+            $registrationDate = $firstAttendance->date;
+            $now = now();
+
+            // If current month is before registration, start with registration month
+            if ($now->isBefore($registrationDate->startOfMonth())) {
+                $this->selectedMonth = $registrationDate->month;
+                $this->selectedYear = $registrationDate->year;
+            } else {
+                $this->selectedMonth = $now->month;
+                $this->selectedYear = $now->year;
+            }
+        } else {
+            $this->selectedMonth = now()->month;
+            $this->selectedYear = now()->year;
+        }
     }
 
     /**
@@ -30,7 +52,7 @@ class EmployeeSalaryHistory extends Component
     public function canNavigateNext()
     {
         $selectedDate = Carbon::create($this->selectedYear, $this->selectedMonth, 1);
-        $currentDate = now();
+        $currentDate = now()->startOfMonth();
 
         return $selectedDate->isBefore($currentDate);
     }
@@ -43,18 +65,19 @@ class EmployeeSalaryHistory extends Component
         $user = Auth::user();
         $selectedDate = Carbon::create($this->selectedYear, $this->selectedMonth, 1);
 
-        // Get first attendance date
+        // Get first month with attendance
         $firstAttendance = Attendance::where('user_id', $user->id)
             ->oldest('date')
             ->first();
 
         if (!$firstAttendance) {
-            return true;
+            return false; // No attendance records, cannot navigate back
         }
 
-        $registrationDate = $firstAttendance->date->startOfMonth();
+        $firstAttendanceMonth = $firstAttendance->date->startOfMonth();
 
-        return $selectedDate->isAfter($registrationDate);
+        // Only allow navigation if selected date is after the first attendance month
+        return $selectedDate->isAfter($firstAttendanceMonth);
     }
 
     /**
@@ -103,16 +126,16 @@ class EmployeeSalaryHistory extends Component
         if ($direction === 'prev') {
             $date->subMonth();
 
-            // Check if we can go back
+            // Check if we can go back before modifying state
             if (!$this->canNavigatePrev()) {
-                return;
+                return; // Don't navigate if at the first attendance month
             }
         } else {
             $date->addMonth();
 
-            // Check if we can go forward
+            // Check if we can go forward before modifying state
             if (!$this->canNavigateNext()) {
-                return;
+                return; // Don't navigate if at or beyond current month
             }
         }
 
