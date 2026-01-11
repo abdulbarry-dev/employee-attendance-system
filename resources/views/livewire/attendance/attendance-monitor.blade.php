@@ -15,7 +15,7 @@
                 <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400 pr-12">{{ __('Present Now') }}</dt>
                 <dd class="mt-4 flex items-baseline gap-2">
                     <span class="text-3xl lg:text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">{{ $stats['present'] }}</span>
-                    <span class="text-sm text-zinc-500">{{ __('users') }}</span>
+                    <span class="text-sm text-zinc-500">{{ __('employee') }}</span>
                 </dd>
             </div>
         </div>
@@ -33,7 +33,7 @@
                 <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400 pr-12">{{ __('On Break') }}</dt>
                 <dd class="mt-4 flex items-baseline gap-2">
                     <span class="text-3xl lg:text-4xl font-bold tracking-tight text-amber-600 dark:text-amber-400">{{ $stats['on_break'] }}</span>
-                    <span class="text-sm text-zinc-500">{{ __('users') }}</span>
+                    <span class="text-sm text-zinc-500">{{ __('employee') }}</span>
                 </dd>
             </div>
         </div>
@@ -51,7 +51,7 @@
                 <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400 pr-12">{{ __('Finished Shift') }}</dt>
                 <dd class="mt-4 flex items-baseline gap-2">
                     <span class="text-3xl lg:text-4xl font-bold tracking-tight text-blue-600 dark:text-blue-400">{{ $stats['completed'] }}</span>
-                    <span class="text-sm text-zinc-500">{{ __('users') }}</span>
+                    <span class="text-sm text-zinc-500">{{ __('employee') }}</span>
                 </dd>
             </div>
         </div>
@@ -69,7 +69,7 @@
                 <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400 pr-12">{{ __('Absent / Late') }}</dt>
                 <dd class="mt-4 flex items-baseline gap-2">
                     <span class="text-3xl lg:text-4xl font-bold tracking-tight text-zinc-400">{{ $stats['absent'] }}</span>
-                    <span class="text-sm text-zinc-500">{{ __('users') }}</span>
+                    <span class="text-sm text-zinc-500">{{ __('employee') }}</span>
                 </dd>
             </div>
         </div>
