@@ -25,6 +25,13 @@ class EmployeeForm extends Component
     #[\Livewire\Attributes\Validate]
     public string $phone_number = '';
 
+    public ?string $monthly_salary = null;
+    public ?string $shift_start = null;
+    public ?string $shift_end = null;
+    public int $grace_period_minutes = 10;
+    public int $break_allowance_minutes = 60;
+    public array $working_days = ['mon', 'tue', 'wed', 'thu', 'fri'];
+
     public function mount(?User $employee = null)
     {
         $this->authorize('create', User::class);
@@ -35,6 +42,12 @@ class EmployeeForm extends Component
             $this->last_name = $employee->last_name;
             $this->email = $employee->email;
             $this->phone_number = $employee->phone_number;
+            $this->monthly_salary = $employee->monthly_salary;
+            $this->shift_start = $employee->shift_start?->format('H:i');
+            $this->shift_end = $employee->shift_end?->format('H:i');
+            $this->grace_period_minutes = (int) ($employee->grace_period_minutes ?? 10);
+            $this->break_allowance_minutes = (int) ($employee->break_allowance_minutes ?? 60);
+            $this->working_days = $employee->working_days ?? ['mon', 'tue', 'wed', 'thu', 'fri'];
         }
     }
 
@@ -46,11 +59,20 @@ class EmployeeForm extends Component
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email' . ($this->employee ? ',' . $this->employee->id : ''),
             'phone_number' => 'required|string|regex:/^(\+?[0-9]{1,3}[-.\s]?)?[0-9]{1,14}$/',
+            'monthly_salary' => 'nullable|numeric|min:0|max:999999.99',
+            'shift_start' => 'nullable|date_format:H:i',
+            'shift_end' => 'nullable|date_format:H:i|after:shift_start',
+            'grace_period_minutes' => 'required|integer|min:0|max:120',
+            'break_allowance_minutes' => 'required|integer|min:0|max:480',
+            'working_days' => 'required|array',
+            'working_days.*' => 'in:sun,mon,tue,wed,thu,fri,sat',
         ];
     }
     public function submit()
     {
         $validated = $this->validate($this->rules());
+
+        $validated['name'] = trim($this->first_name . ' ' . $this->last_name);
 
         if ($this->employee) {
             $this->authorize('update', $this->employee);
@@ -62,7 +84,7 @@ class EmployeeForm extends Component
             $tempPassword = str()->random(12);
             $employee = User::create([
                 ...$validated,
-                'name' => "{$this->first_name} {$this->last_name}",
+                'name' => $validated['name'],
                 'password' => bcrypt($tempPassword),
             ]);
 

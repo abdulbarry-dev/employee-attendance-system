@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\EmployeePenalty;
 
 class Attendance extends Model
 {
@@ -29,6 +30,11 @@ class Attendance extends Model
     public function breaks()
     {
         return $this->hasMany(AttendanceBreak::class);
+    }
+
+    public function penalties()
+    {
+        return $this->hasMany(EmployeePenalty::class);
     }
 
     /**

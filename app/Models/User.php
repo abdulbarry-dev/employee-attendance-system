@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
+use App\Models\EmployeePenalty;
 
 class User extends Authenticatable
 {
@@ -28,6 +29,12 @@ class User extends Authenticatable
         'password',
         'phone_number',
         'is_banned',
+        'monthly_salary',
+        'shift_start',
+        'shift_end',
+        'grace_period_minutes',
+        'break_allowance_minutes',
+        'working_days',
     ];
 
     /**
@@ -53,6 +60,12 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_banned' => 'boolean',
+            'monthly_salary' => 'decimal:2',
+            'shift_start' => 'datetime:H:i',
+            'shift_end' => 'datetime:H:i',
+            'grace_period_minutes' => 'integer',
+            'break_allowance_minutes' => 'integer',
+            'working_days' => 'array',
         ];
     }
 
@@ -101,5 +114,10 @@ class User extends Authenticatable
     public function isBanned(): bool
     {
         return $this->is_banned;
+    }
+
+    public function penalties()
+    {
+        return $this->hasMany(EmployeePenalty::class);
     }
 }

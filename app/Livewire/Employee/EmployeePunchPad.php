@@ -8,6 +8,7 @@ use Livewire\Attributes\Title;
 
 use App\Models\Attendance;
 use App\Models\AttendanceBreak;
+use App\Services\AttendancePenaltyService;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
@@ -54,6 +55,15 @@ class EmployeePunchPad extends Component
             'status' => 'present',
         ]);
 
+        $this->attendance->load('user');
+
+        // Apply late penalty if check-in is after shift start + grace
+        app(AttendancePenaltyService::class)->applyLatePenalty($this->attendance);
+
+        $this->attendance->refresh();
+
+        $this->refreshState();
+
         session()->flash('success', 'Checked in successfully at ' . now()->format('H:i'));
     }
 
@@ -96,6 +106,14 @@ class EmployeePunchPad extends Component
         if (!$this->currentBreak) return;
 
         $this->currentBreak->update(['ended_at' => now()]);
+
+        $this->attendance->refresh()->load('breaks', 'user');
+
+        $totalBreakMinutes = $this->attendance->total_break_duration;
+
+        app(AttendancePenaltyService::class)
+            ->applyBreakOveragePenalty($this->attendance, $totalBreakMinutes);
+
         $this->attendance->update(['status' => 'present']);
 
         session()->flash('success', 'Welcome back!');
