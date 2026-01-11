@@ -46,14 +46,22 @@
                                         {{ intdiv($attendance->total_break_duration, 60) }}h {{ $attendance->total_break_duration % 60 }}m
                                     </span>
                                 @else
-                                    <span class="text-zinc-400 dark:text-zinc-600">-</span>
+                                    <span class="text-zinc-400 dark:text-zinc-600">--</span>
                                 @endif
                             </td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-zinc-500 dark:text-zinc-400 font-mono">
-                                @if($attendance->actual_work_duration > 0)
-                                    {{ intdiv($attendance->actual_work_duration, 60) }}h {{ $attendance->actual_work_duration % 60 }}m
+                                @if($attendance->check_out && $attendance->check_in)
+                                    @php
+                                        $workDuration = $attendance->actual_work_duration;
+                                        $totalMinutes = $attendance->check_out->diffInMinutes($attendance->check_in);
+                                    @endphp
+                                    @if($workDuration > 0)
+                                        {{ intdiv($workDuration, 60) }}h {{ $workDuration % 60 }}m
+                                    @else
+                                        {{ intdiv($totalMinutes, 60) }}h {{ $totalMinutes % 60 }}m
+                                    @endif
                                 @else
-                                    -
+                                    --
                                 @endif
                             </td>
 

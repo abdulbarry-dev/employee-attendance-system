@@ -22,6 +22,8 @@ class Attendance extends Model
         'check_out' => 'datetime',
     ];
 
+    protected $appends = ['total_break_duration', 'actual_work_duration'];
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -42,17 +44,15 @@ class Attendance extends Model
      */
     public function getTotalBreakDurationAttribute()
     {
-        if ($this->breaks->isEmpty()) {
-            return 0;
+        $breakDuration = 0;
+
+        foreach ($this->breaks as $break) {
+            if ($break->ended_at && $break->started_at) {
+                $breakDuration += abs($break->ended_at->diffInMinutes($break->started_at));
+            }
         }
 
-        return $this->breaks
-            ->filter(function ($break) {
-                return $break->ended_at !== null;
-            })
-            ->sum(function ($break) {
-                return $break->ended_at->diffInMinutes($break->started_at);
-            });
+        return $breakDuration;
     }
 
     /**
@@ -60,11 +60,11 @@ class Attendance extends Model
      */
     public function getActualWorkDurationAttribute()
     {
-        if (!$this->check_out) {
+        if (!$this->check_out || !$this->check_in) {
             return 0;
         }
 
-        $totalMinutes = $this->check_out->diffInMinutes($this->check_in);
+        $totalMinutes = abs($this->check_out->diffInMinutes($this->check_in));
         $breakMinutes = $this->total_break_duration;
 
         return max(0, $totalMinutes - $breakMinutes);
