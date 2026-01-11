@@ -50,8 +50,8 @@
                                 @endif
                             </td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-zinc-500 dark:text-zinc-400 font-mono">
-                                @if($attendance->work_duration)
-                                    {{ intdiv($attendance->work_duration, 60) }}h {{ $attendance->work_duration % 60 }}m
+                                @if($attendance->actual_work_duration > 0)
+                                    {{ intdiv($attendance->actual_work_duration, 60) }}h {{ $attendance->actual_work_duration % 60 }}m
                                 @else
                                     -
                                 @endif

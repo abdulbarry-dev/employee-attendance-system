@@ -42,10 +42,31 @@ class Attendance extends Model
      */
     public function getTotalBreakDurationAttribute()
     {
+        if ($this->breaks->isEmpty()) {
+            return 0;
+        }
+
         return $this->breaks
-            ->whereNotNull('ended_at')
+            ->filter(function ($break) {
+                return $break->ended_at !== null;
+            })
             ->sum(function ($break) {
                 return $break->ended_at->diffInMinutes($break->started_at);
             });
+    }
+
+    /**
+     * Calculate actual work duration (checkout - checkin - breaks) in minutes
+     */
+    public function getActualWorkDurationAttribute()
+    {
+        if (!$this->check_out) {
+            return 0;
+        }
+
+        $totalMinutes = $this->check_out->diffInMinutes($this->check_in);
+        $breakMinutes = $this->total_break_duration;
+
+        return max(0, $totalMinutes - $breakMinutes);
     }
 }
