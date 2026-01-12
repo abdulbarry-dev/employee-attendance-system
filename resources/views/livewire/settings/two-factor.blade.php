@@ -22,7 +22,7 @@
 
                     <div class="flex justify-start">
                         <flux:button
-                            variant="negative"
+                            variant="danger"
                             icon="shield-exclamation"
                             icon:variant="outline"
                             wire:click="disable"

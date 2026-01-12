@@ -24,11 +24,11 @@
             </div>
 
             <div class="md:w-56">
-                <x-select-filter wire-model="statusFilter" icon="funnel">
-                    <option value="all">{{ __('All Employees') }}</option>
-                    <option value="active">{{ __('Active Only') }}</option>
-                    <option value="banned">{{ __('Banned Only') }}</option>
-                </x-select-filter>
+                <flux:select wire:model.live="statusFilter" placeholder="{{ __('All Employees') }}">
+                    <flux:select.option value="all">{{ __('All Employees') }}</flux:select.option>
+                    <flux:select.option value="active">{{ __('Active Only') }}</flux:select.option>
+                    <flux:select.option value="banned">{{ __('Banned Only') }}</flux:select.option>
+                </flux:select>
             </div>
         </div>
 

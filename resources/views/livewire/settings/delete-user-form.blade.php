@@ -5,7 +5,7 @@
     </div>
 
     <flux:modal.trigger name="confirm-user-deletion">
-        <flux:button variant="negative" x-data="" x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')">
+        <flux:button variant="danger" x-data="" x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')">
             {{ __('Delete account') }}
         </flux:button>
     </flux:modal.trigger>
@@ -27,7 +27,7 @@
                     <flux:button variant="ghost">{{ __('Cancel') }}</flux:button>
                 </flux:modal.close>
 
-                <flux:button variant="negative" type="submit">{{ __('Delete account') }}</flux:button>
+                <flux:button variant="danger" type="submit">{{ __('Delete account') }}</flux:button>
             </div>
         </form>
     </flux:modal>
