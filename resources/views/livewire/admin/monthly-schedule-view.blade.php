@@ -62,7 +62,7 @@
             <div class="grid grid-cols-7 border-b border-zinc-200 dark:border-zinc-700">
                 @foreach (['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as $day)
                     <div class="px-4 py-3 text-center font-semibold text-zinc-700 dark:text-zinc-300">
-                        {{ $day }}
+                        {{ __($day) }}
                     </div>
                 @endforeach
             </div>

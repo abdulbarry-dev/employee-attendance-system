@@ -62,13 +62,13 @@ class EmployeeProfile extends Component
         }
 
         $dayNames = [
-            'sun' => 'Sunday',
-            'mon' => 'Monday',
-            'tue' => 'Tuesday',
-            'wed' => 'Wednesday',
-            'thu' => 'Thursday',
-            'fri' => 'Friday',
-            'sat' => 'Saturday',
+            'sun' => __('Sunday'),
+            'mon' => __('Monday'),
+            'tue' => __('Tuesday'),
+            'wed' => __('Wednesday'),
+            'thu' => __('Thursday'),
+            'fri' => __('Friday'),
+            'sat' => __('Saturday'),
         ];
 
         return collect($workingDays)->map(fn ($day) => $dayNames[$day] ?? $day)->join(', ');

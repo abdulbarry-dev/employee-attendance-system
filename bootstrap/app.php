@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\CheckBannedStatus;
+use App\Http\Middleware\SetLocaleFromUser;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Append banned status check and employee token capture to web middleware stack
         $middleware->web(append: [
+            SetLocaleFromUser::class,
             CheckBannedStatus::class,
             \App\Http\Middleware\CaptureEmployeeToken::class,
             \App\Http\Middleware\EnsureFreshEmployeeQrSession::class,

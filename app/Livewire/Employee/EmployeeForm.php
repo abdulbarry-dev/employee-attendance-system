@@ -109,12 +109,13 @@ class EmployeeForm extends Component
         } else {
             $this->authorize('create', User::class);
 
-            // Create employee with temporary password
+            // Create employee with temporary password and inherit admin's locale
             $tempPassword = str()->random(12);
             $employee = User::create([
                 ...$validated,
                 'name' => $validated['name'],
                 'password' => bcrypt($tempPassword),
+                'preferred_locale' => auth()->user()->preferred_locale ?? 'en',
             ]);
 
             // Assign employee role
