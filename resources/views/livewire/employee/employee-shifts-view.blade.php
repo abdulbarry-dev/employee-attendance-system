@@ -72,7 +72,7 @@
             <!-- Day Headers -->
             <div class="grid grid-cols-7 border-b border-zinc-200 dark:border-zinc-700">
                 @foreach (['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as $day)
-                    <div class="p-4 text-center font-semibold text-zinc-700 dark:text-zinc-300 text-sm bg-zinc-50 dark:bg-zinc-800">{{ $day }}</div>
+                    <div class="p-4 text-center font-semibold text-zinc-700 dark:text-zinc-300 text-sm bg-zinc-50 dark:bg-zinc-800">{{ __($day) }}</div>
                 @endforeach
             </div>
 

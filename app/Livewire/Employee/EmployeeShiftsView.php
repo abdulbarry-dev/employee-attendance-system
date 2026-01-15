@@ -293,9 +293,12 @@ class EmployeeShiftsView extends Component
 
     public function render()
     {
+        $date = Carbon::createFromDate($this->year, $this->month, 1);
+        $monthName = __($date->format('F')) . ' ' . $date->format('Y');
+
         return view('livewire.employee.employee-shifts-view', [
             'calendar' => $this->getCalendarGrid(),
-            'monthName' => Carbon::createFromDate($this->year, $this->month, 1)->format('F Y'),
+            'monthName' => $monthName,
             'selectedDate' => $this->selectedDateDay
                 ? Carbon::createFromDate($this->year, $this->month, $this->selectedDateDay)
                 : null,
