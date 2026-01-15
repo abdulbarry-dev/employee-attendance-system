@@ -25,6 +25,7 @@ class User extends Authenticatable
         'first_name',
         'last_name',
         'email',
+        'preferred_locale',
         'password',
         'phone_number',
         'is_banned',
@@ -60,6 +61,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'preferred_locale' => 'string',
             'is_banned' => 'boolean',
             'banned_at' => 'datetime',
             'monthly_salary' => 'decimal:2',
