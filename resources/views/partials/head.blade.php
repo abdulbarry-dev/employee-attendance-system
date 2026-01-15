@@ -2,7 +2,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="description" content="Professional attendance tracking and employee management system" />
 <meta name="keywords" content="attendance, employee management, time tracking, QR code attendance" />
-<meta name="author" content="Arena Système Pointage" />
+<meta name="author" content="Attendance System" />
 
 <title>{{ $title ? $title . ' - ' . config('app.name') : config('app.name') }}</title>
 

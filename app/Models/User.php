@@ -9,12 +9,11 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
-use App\Models\EmployeePenalty;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasRoles;
+    use HasFactory, HasRoles, Notifiable, TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -92,6 +91,7 @@ class User extends Authenticatable
         if ($this->first_name && $this->last_name) {
             return "{$this->first_name} {$this->last_name}";
         }
+
         return $this->name;
     }
 
@@ -116,11 +116,21 @@ class User extends Authenticatable
      */
     public function isBanned(): bool
     {
-        return $this->is_banned;
+        return (bool) $this->is_banned;
     }
 
     public function penalties()
     {
         return $this->hasMany(EmployeePenalty::class);
+    }
+
+    public function shifts()
+    {
+        return $this->hasMany(EmployeeShift::class);
+    }
+
+    public function monthlyShifts()
+    {
+        return $this->hasMany(EmployeeMonthlyShift::class);
     }
 }

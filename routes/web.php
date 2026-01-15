@@ -31,6 +31,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('role:admin')
         ->name('employees.edit');
 
+    Route::get('/employees/{employee}/shifts', \App\Livewire\Employee\EmployeeShiftsView::class)
+        ->middleware('role:admin')
+        ->name('employees.shifts');
+
+    Route::get('/employees/{employee}/monthly-schedule', \App\Livewire\Admin\MonthlyScheduleView::class)
+        ->middleware('role:admin')
+        ->name('employees.monthly-schedule');
+
     // Office Kiosk (Admin only)
     Route::get('/office-kiosk', \App\Livewire\OfficeKiosk::class)
         ->middleware('role:admin')
@@ -54,6 +62,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Employee profile and information
     Route::get('/employee/profile', \App\Livewire\Employee\EmployeeProfile::class)
         ->name('employee.profile');
+
+    // Employee schedule view
+    Route::get('/employee/schedule', \App\Livewire\Employee\EmployeeSchedule::class)
+        ->name('employee.schedule');
 
     // Salary and deductions history
     Route::get('/employee/salary-history', \App\Livewire\Employee\EmployeeSalaryHistory::class)

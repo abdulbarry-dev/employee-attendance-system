@@ -12,15 +12,18 @@ class EmployeeList extends Component
     use AuthorizesRequests, WithPagination;
 
     public string $search = '';
+
     public string $statusFilter = 'all';
 
     public bool $showDeleteModal = false;
+
     public ?int $employeeIdToDelete = null;
 
     public bool $showBanModal = false;
-    public ?int $employeeIdToBan = null;
-    public string $banReason = '';
 
+    public ?int $employeeIdToBan = null;
+
+    public string $banReason = '';
 
     public function employees()
     {
@@ -29,10 +32,10 @@ class EmployeeList extends Component
         return User::role('employee')
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
-                    $q->where('first_name', 'like', '%' . $this->search . '%')
-                        ->orWhere('last_name', 'like', '%' . $this->search . '%')
-                        ->orWhere('email', 'like', '%' . $this->search . '%')
-                        ->orWhere('phone_number', 'like', '%' . $this->search . '%');
+                    $q->where('first_name', 'like', '%'.$this->search.'%')
+                        ->orWhere('last_name', 'like', '%'.$this->search.'%')
+                        ->orWhere('email', 'like', '%'.$this->search.'%')
+                        ->orWhere('phone_number', 'like', '%'.$this->search.'%');
                 });
             })
             ->when($this->statusFilter !== 'all', function ($query) {
@@ -67,7 +70,7 @@ class EmployeeList extends Component
 
     public function ban()
     {
-        if (!$this->employeeIdToBan) {
+        if (! $this->employeeIdToBan) {
             return;
         }
 

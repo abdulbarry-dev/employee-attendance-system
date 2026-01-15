@@ -1,28 +1,28 @@
 <div class="space-y-6">
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <!-- Stats Grid - Responsive -->
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <!-- Present -->
         <div class="overflow-hidden rounded-xl bg-white p-6 shadow-sm ring-1 ring-zinc-900/5 dark:bg-zinc-800 dark:ring-zinc-100/10">
             <dt class="truncate text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Present Now') }}</dt>
-            <dd class="mt-2 text-3xl font-semibold text-zinc-900 dark:text-white">{{ $stats['present'] }}</dd>
+            <dd class="mt-2 text-3xl lg:text-4xl font-semibold text-zinc-900 dark:text-white">{{ $stats['present'] }}</dd>
         </div>
 
         <!-- On Break -->
         <div class="overflow-hidden rounded-xl bg-white p-6 shadow-sm ring-1 ring-zinc-900/5 dark:bg-zinc-800 dark:ring-zinc-100/10">
             <dt class="truncate text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('On Break') }}</dt>
-            <dd class="mt-2 text-3xl font-semibold text-amber-600 dark:text-amber-400">{{ $stats['on_break'] }}</dd>
+            <dd class="mt-2 text-3xl lg:text-4xl font-semibold text-amber-600 dark:text-amber-400">{{ $stats['on_break'] }}</dd>
         </div>
 
         <!-- Finished -->
         <div class="overflow-hidden rounded-xl bg-white p-6 shadow-sm ring-1 ring-zinc-900/5 dark:bg-zinc-800 dark:ring-zinc-100/10">
             <dt class="truncate text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Finished Shift') }}</dt>
-            <dd class="mt-2 text-3xl font-semibold text-blue-600 dark:text-blue-400">{{ $stats['completed'] }}</dd>
+            <dd class="mt-2 text-3xl lg:text-4xl font-semibold text-blue-600 dark:text-blue-400">{{ $stats['completed'] }}</dd>
         </div>
 
         <!-- Absent -->
         <div class="overflow-hidden rounded-xl bg-white p-6 shadow-sm ring-1 ring-zinc-900/5 dark:bg-zinc-800 dark:ring-zinc-100/10">
             <dt class="truncate text-sm font-medium text-zinc-500 dark:text-zinc-400">{{ __('Absent / Not In') }}</dt>
-            <dd class="mt-2 text-3xl font-semibold text-zinc-400">{{ $stats['absent'] }}</dd>
+            <dd class="mt-2 text-3xl lg:text-4xl font-semibold text-zinc-400">{{ $stats['absent'] }}</dd>
         </div>
     </div>
 

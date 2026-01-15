@@ -2,18 +2,19 @@
 
 namespace App\Livewire\Employee;
 
-use Livewire\Component;
-use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
-use Illuminate\Support\Facades\Auth;
 use App\Models\EmployeePenalty;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
+use Livewire\Component;
 
 #[Layout('components.layouts.app')]
 #[Title('My Profile')]
 class EmployeeProfile extends Component
 {
     public $selectedMonth;
+
     public $selectedYear;
 
     public function mount()
@@ -24,7 +25,7 @@ class EmployeeProfile extends Component
 
     public function getEmployeeProperty()
     {
-        return Auth::user();
+        return Auth::user()->loadMissing('shifts');
     }
 
     public function getPenaltiesProperty()
@@ -45,7 +46,7 @@ class EmployeeProfile extends Component
 
     public function getNetSalaryProperty()
     {
-        if (!$this->employee->monthly_salary) {
+        if (! $this->employee->monthly_salary) {
             return 0;
         }
 
@@ -54,7 +55,11 @@ class EmployeeProfile extends Component
 
     public function getWorkingDaysProperty()
     {
-        $workingDays = $this->employee->working_days ?? [];
+        $workingDays = $this->employee->shifts?->pluck('day_of_week')->unique()->values()->all();
+
+        if (empty($workingDays)) {
+            $workingDays = $this->employee->working_days ?? [];
+        }
 
         $dayNames = [
             'sun' => 'Sunday',
@@ -66,7 +71,7 @@ class EmployeeProfile extends Component
             'sat' => 'Saturday',
         ];
 
-        return collect($workingDays)->map(fn($day) => $dayNames[$day] ?? $day)->join(', ');
+        return collect($workingDays)->map(fn ($day) => $dayNames[$day] ?? $day)->join(', ');
     }
 
     public function changeMonth($direction)

@@ -21,6 +21,8 @@ class AuthenticationTest extends TestCase
     public function test_users_can_authenticate_using_the_login_screen(): void
     {
         $user = User::factory()->create();
+        // Admin users can log in directly without QR token
+        $user->assignRole('admin');
 
         $response = $this->post(route('login.store'), [
             'email' => $user->email,
@@ -50,15 +52,13 @@ class AuthenticationTest extends TestCase
 
     public function test_users_with_two_factor_enabled_are_redirected_to_two_factor_challenge(): void
     {
-        if (! Features::canManageTwoFactorAuthentication()) {
-            $this->markTestSkipped('Two-factor authentication is not enabled.');
-        }
         Features::twoFactorAuthentication([
             'confirm' => true,
             'confirmPassword' => true,
         ]);
 
         $user = User::factory()->withTwoFactor()->create();
+        $user->assignRole('admin');
 
         $response = $this->post(route('login.store'), [
             'email' => $user->email,
@@ -72,6 +72,7 @@ class AuthenticationTest extends TestCase
     public function test_users_can_logout(): void
     {
         $user = User::factory()->create();
+        $user->assignRole('admin');
 
         $response = $this->actingAs($user)->post(route('logout'));
 

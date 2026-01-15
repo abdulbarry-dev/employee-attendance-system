@@ -40,34 +40,30 @@
                 <h3 class="font-semibold text-zinc-900 dark:text-white">{{ __('Shift Schedule') }}</h3>
             </div>
             <div class="p-6 space-y-4">
-                @if($employee->shift_start && $employee->shift_end)
-                    <div class="grid gap-6 md:grid-cols-2">
-                        <div>
-                            <label class="text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Shift Start') }}</label>
-                            <p class="mt-1 flex items-center gap-2">
-                                <svg class="size-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                <span class="font-mono text-lg font-semibold text-zinc-900 dark:text-white">{{ \Carbon\Carbon::parse($employee->shift_start)->format('h:i A') }}</span>
-                            </p>
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Shift End') }}</label>
-                            <p class="mt-1 flex items-center gap-2">
-                                <svg class="size-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                <span class="font-mono text-lg font-semibold text-zinc-900 dark:text-white">{{ \Carbon\Carbon::parse($employee->shift_end)->format('h:i A') }}</span>
-                            </p>
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Grace Period') }}</label>
-                            <p class="mt-1 text-base text-zinc-900 dark:text-white">{{ $employee->grace_period_minutes ?? 0 }} {{ __('minutes') }}</p>
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Daily Break Allowance') }}</label>
-                            <p class="mt-1 text-base text-zinc-900 dark:text-white">{{ $employee->break_allowance_minutes ?? 0 }} {{ __('minutes') }}</p>
-                        </div>
+                @if($employee->shifts && $employee->shifts->count())
+                    <div class="space-y-3">
+                        @foreach($employee->shifts->sortBy(['day_of_week', 'start_time']) as $shift)
+                            <div class="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-800/60">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-semibold text-zinc-700 dark:text-zinc-200 uppercase">{{ strtoupper($shift->day_of_week) }}</span>
+                                        @if($shift->name)
+                                            <span class="text-xs text-zinc-500 dark:text-zinc-400">{{ $shift->name }}</span>
+                                        @endif
+                                    </div>
+                                    <span class="font-mono text-base font-semibold text-zinc-900 dark:text-white">
+                                        {{ \Carbon\Carbon::parse($shift->start_time)->format('h:i A') }}
+                                        <span class="text-zinc-500">→</span>
+                                        {{ \Carbon\Carbon::parse($shift->end_time)->format('h:i A') }}
+                                    </span>
+                                </div>
+                                <div class="mt-2 flex flex-wrap gap-4 text-xs text-zinc-600 dark:text-zinc-400">
+                                    <span>{{ __('Grace: :minutes min', ['minutes' => $shift->grace_period_minutes]) }}</span>
+                                    <span>{{ __('Break Allowance: :minutes min', ['minutes' => $shift->break_allowance_minutes]) }}</span>
+                                    <span>{{ $shift->is_active ? __('Active') : __('Inactive') }}</span>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                     <div>
                         <label class="text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Working Days') }}</label>

@@ -69,7 +69,7 @@
             <div class="space-y-4">
                 <flux:heading size="sm">{{ __('Salary & Schedule') }}</flux:heading>
 
-                <div class="grid gap-6 md:grid-cols-2">
+                <div class="grid gap-6 md:grid-cols-3">
                     <flux:input
                         wire:model="monthly_salary"
                         type="number"
@@ -89,76 +89,18 @@
                         placeholder="10"
                         icon="clock"
                     />
-                </div>
 
-                <div class="grid gap-6 md:grid-cols-2">
-                    <div>
-                        <flux:input
-                            wire:model="shift_start"
-                            type="time"
-                            label="{{ __('Shift Start Time') }}"
-                            icon="clock"
-                        />
-                    </div>
-
-                    <div>
-                        <flux:input
-                            wire:model="shift_end"
-                            type="time"
-                            label="{{ __('Shift End Time') }}"
-                            icon="clock"
-                        />
-                    </div>
-                </div>
-
-                <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/30 dark:bg-amber-900/10">
-                    <p class="text-xs leading-relaxed text-amber-900 dark:text-amber-300">
-                        <strong class="font-semibold">{{ __('Night Shifts:') }}</strong>
-                        {{ __('For shifts spanning midnight (e.g., 7pm to 4am), the end time will be earlier than start time. The system will automatically adjust lateness detection.') }}
-                    </p>
-                </div>
-
-                <div>
                     <flux:input
                         wire:model="break_allowance_minutes"
                         type="number"
                         min="0"
                         max="480"
-                        label="{{ __('Daily Break Allowance (minutes)') }}"
+                        label="{{ __('Break Allowance (minutes)') }}"
                         placeholder="60"
                         icon="pause-circle"
                     />
                 </div>
-            </div>
-
-            <!-- Working Days Section -->
-            <div class="space-y-4">
-                <div>
-                    <flux:heading size="sm">{{ __('Working Days') }}</flux:heading>
-                    <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{{ __('Select the days this employee is scheduled to work') }}</p>
                 </div>
-                <div class="grid grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-7 p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50">
-                    @php($days = [
-                        'sun' => __('Sunday'),
-                        'mon' => __('Monday'),
-                        'tue' => __('Tuesday'),
-                        'wed' => __('Wednesday'),
-                        'thu' => __('Thursday'),
-                        'fri' => __('Friday'),
-                        'sat' => __('Saturday'),
-                    ])
-
-                    @foreach($days as $value => $label)
-                        <div class="flex items-center">
-                            <flux:checkbox
-                                wire:model="working_days"
-                                value="{{ $value }}"
-                                label="{{ substr($label, 0, 3) }}"
-                            />
-                        </div>
-                    @endforeach
-                </div>
-            </div>
 
             @if(!$employee)
                 <flux:separator />
@@ -169,7 +111,7 @@
                     </svg>
                     <div class="text-sm leading-relaxed text-blue-900 dark:text-zinc-200">
                         <strong class="font-semibold text-blue-950 dark:text-white">{{ __('Note:') }}</strong>
-                        {{ __('A temporary password will be generated and sent to the employee\'s email address. They will be able to set their own password upon first login.') }}
+                        {{ __('A temporary password will be generated and sent to the employee\'s email address. They will be able to set their own password upon first login. After creation, you can manage their shift schedule using the calendar view.') }}
                     </div>
                 </div>
             @endif
@@ -183,6 +125,17 @@
                 </flux:button>
 
                 <div class="flex gap-3">
+                    @if($employee)
+                        <flux:button
+                            :href="route('employees.monthly-schedule', $employee)"
+                            wire:navigate
+                            variant="subtle"
+                            icon="calendar-days"
+                        >
+                            {{ __('Manage Schedule') }}
+                        </flux:button>
+                    @endif
+
                     <flux:button type="submit" variant="primary" icon="check">
                         @if($employee)
                             {{ __('Update Employee') }}

@@ -2,27 +2,31 @@
 
 namespace App\Livewire\Employee;
 
-use Livewire\Component;
-use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
-
 use App\Models\Attendance;
 use App\Models\AttendanceBreak;
+use App\Models\EmployeeShift;
 use App\Services\AttendancePenaltyService;
-use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
+use Livewire\Component;
 
 #[Layout('components.layouts.app')]
 #[Title('Attendance Punch')]
 class EmployeePunchPad extends Component
 {
     public $attendance;
+
     public $currentBreak;
+
     public $currentTime;
 
     // Geolocation data
     public $latitude;
+
     public $longitude;
+
     public $error;
 
     public function mount()
@@ -34,7 +38,9 @@ class EmployeePunchPad extends Component
     public function refreshState()
     {
         $this->attendance = Attendance::where('user_id', Auth::id())
-            ->where('date', today())
+            ->whereNull('check_out')
+            ->latest('check_in')
+            ->with('shift')
             ->first();
 
         if ($this->attendance) {
@@ -48,75 +54,168 @@ class EmployeePunchPad extends Component
     {
         $user = Auth::user();
         $now = now();
+        $this->ensureShifts($user);
 
-        if (!$user->shift_start || !$user->shift_end) {
-            return 'Your shift times are not configured. Contact your administrator.';
+        if ($user->shifts->isEmpty()) {
+            return 'Your shifts are not configured. Contact your administrator.';
         }
 
-        $workingDays = $user->working_days ?? ['mon', 'tue', 'wed', 'thu', 'fri'];
-        $workingDays = is_array($workingDays) ? array_map('strtolower', $workingDays) : ['mon', 'tue', 'wed', 'thu', 'fri'];
+        $currentShift = $this->resolveShiftForMoment($user->shifts, $now);
 
-        $shiftStart = Carbon::parse($user->shift_start);
-        $shiftEnd = Carbon::parse($user->shift_end);
-
-        $shiftDate = $now->copy();
-        $isNightShift = $shiftEnd->lt($shiftStart);
-
-        $todayShiftStart = $shiftStart->clone()->setDate($now->year, $now->month, $now->day);
-
-        if ($isNightShift && $now->hour < $shiftStart->hour) {
-            $todayShiftStart->subDay();
-            $shiftDate = $shiftDate->subDay();
+        if ($currentShift) {
+            return null;
         }
 
-        $dayKey = strtolower($shiftDate->format('D'));
+        $nextWindow = $this->nextShiftWindow($user->shifts, $now);
 
-        if (!in_array($dayKey, $workingDays, true)) {
-            return 'You cannot check in today because this is not one of your scheduled working days.';
+        if ($nextWindow) {
+            return 'You can check in at '.$nextWindow['start']->format('h:i A').' for your next shift.';
         }
 
-        if ($now->lt($todayShiftStart)) {
-            return 'You can check in at ' . $shiftStart->format('h:i A') . ' once your shift starts.';
-        }
-
-        return null;
+        return 'No shift is scheduled for the current time.';
     }
 
     private function resolveShiftEnd(): ?Carbon
     {
         $user = Auth::user();
-
-        if (!$this->attendance || !$user->shift_start || !$user->shift_end) {
+        if (! $this->attendance || ! $this->attendance->shift) {
             return null;
         }
 
-        $shiftStart = Carbon::parse($user->shift_start);
-        $shiftEnd = Carbon::parse($user->shift_end);
-        $checkInTime = $this->attendance->check_in ?? now();
-
-        $shiftStartDateTime = $shiftStart->copy()->setDate(
-            $checkInTime->year,
-            $checkInTime->month,
-            $checkInTime->day
+        $window = $this->buildShiftWindow(
+            $this->attendance->shift,
+            Carbon::parse($this->attendance->date)
         );
 
-        $isNightShift = $shiftEnd->lt($shiftStart);
+        return $window['end'];
+    }
 
-        if ($isNightShift && $checkInTime->hour < $shiftStart->hour) {
-            $shiftStartDateTime->subDay();
+    private function ensureShifts($user): void
+    {
+        $user->loadMissing('shifts');
+
+        if ($user->shifts->isNotEmpty()) {
+            return;
         }
 
-        $shiftEndDateTime = $shiftEnd->copy()->setDate(
-            $shiftStartDateTime->year,
-            $shiftStartDateTime->month,
-            $shiftStartDateTime->day
+        if ($user->shift_start && $user->shift_end) {
+            $legacyDays = $user->working_days ?? ['mon', 'tue', 'wed', 'thu', 'fri'];
+
+            foreach ($legacyDays as $day) {
+                $user->shifts()->create([
+                    'day_of_week' => $day,
+                    'start_time' => $user->shift_start,
+                    'end_time' => $user->shift_end,
+                    'grace_period_minutes' => $user->grace_period_minutes ?? 0,
+                    'break_allowance_minutes' => $user->break_allowance_minutes ?? 0,
+                ]);
+            }
+
+            $user->refresh()->loadMissing('shifts');
+        }
+    }
+
+    private function buildShiftWindow(EmployeeShift $shift, Carbon $anchorDate): array
+    {
+        $shiftStart = Carbon::parse($shift->start_time)->setDate(
+            $anchorDate->year,
+            $anchorDate->month,
+            $anchorDate->day
         );
 
-        if ($isNightShift) {
-            $shiftEndDateTime->addDay();
+        $shiftEnd = Carbon::parse($shift->end_time)->setDate(
+            $anchorDate->year,
+            $anchorDate->month,
+            $anchorDate->day
+        );
+
+        if ($shiftEnd->lte($shiftStart)) {
+            $shiftEnd->addDay();
         }
 
-        return $shiftEndDateTime;
+        return [
+            'start' => $shiftStart,
+            'end' => $shiftEnd,
+        ];
+    }
+
+    private function resolveShiftForMoment($shifts, Carbon $moment): ?EmployeeShift
+    {
+        $user = Auth::user();
+
+        // Check for monthly shift override first
+        $monthlyOverride = \App\Models\EmployeeMonthlyShift::where('user_id', $user->id)
+            ->where('date', $moment->toDateString())
+            ->first();
+
+        if ($monthlyOverride) {
+            return $monthlyOverride->shift;
+        }
+
+        $dayKey = strtolower($moment->format('D'));
+        $previousDayKey = strtolower($moment->copy()->subDay()->format('D'));
+
+        $matching = null;
+        $matchingStart = null;
+
+        foreach ($shifts as $shift) {
+            if (! $shift->is_active) {
+                continue;
+            }
+
+            if ($shift->day_of_week !== $dayKey && $shift->day_of_week !== $previousDayKey) {
+                continue;
+            }
+
+            $anchorDate = $shift->day_of_week === $dayKey ? $moment->copy() : $moment->copy()->subDay();
+            $window = $this->buildShiftWindow($shift, $anchorDate);
+
+            if ($moment->between($window['start'], $window['end'])) {
+                if (! $matching || $window['start']->lt($matchingStart)) {
+                    $matching = $shift;
+                    $matchingStart = $window['start'];
+                }
+            }
+        }
+
+        return $matching;
+    }
+
+    private function nextShiftWindow($shifts, Carbon $moment): ?array
+    {
+        $next = null;
+        $shifts = collect($shifts)->where('is_active', true);
+
+        for ($i = 0; $i <= 6; $i++) {
+            $candidateDate = $moment->copy()->addDays($i);
+            $dayKey = strtolower($candidateDate->format('D'));
+
+            foreach ($shifts as $shift) {
+                if ($shift->day_of_week !== $dayKey) {
+                    continue;
+                }
+
+                $window = $this->buildShiftWindow($shift, $candidateDate);
+
+                if ($window['start']->lte($moment)) {
+                    continue;
+                }
+
+                if (! $next || $window['start']->lt($next['start'])) {
+                    $next = [
+                        'shift' => $shift,
+                        'start' => $window['start'],
+                        'end' => $window['end'],
+                    ];
+                }
+            }
+
+            if ($next) {
+                break;
+            }
+        }
+
+        return $next;
     }
 
     public function checkIn()
@@ -124,81 +223,76 @@ class EmployeePunchPad extends Component
         $user = Auth::user();
         $now = now();
 
-        // Require shift times to be configured
-        if (!$user->shift_start || !$user->shift_end) {
-            session()->flash('error', 'Your shift times are not configured. Contact your administrator.');
+        $this->ensureShifts($user);
+
+        if ($user->shifts->isEmpty()) {
+            session()->flash('error', 'Your shifts are not configured. Contact your administrator.');
+
             return;
         }
 
-        // If not configured, assume standard weekdays to prevent weekend check-ins by default
-        $workingDays = $user->working_days ?? ['mon', 'tue', 'wed', 'thu', 'fri'];
+        $shift = $this->resolveShiftForMoment($user->shifts, $now);
 
-        $shiftStart = Carbon::parse($user->shift_start);
-        $shiftEnd = Carbon::parse($user->shift_end);
+        if (! $shift) {
+            $reason = $this->checkInBlockReason();
+            session()->flash('error', $reason ?? 'No shift is scheduled for this time.');
 
-        // Determine shift date (for night shifts, early morning belongs to previous day)
-        $shiftDate = $now->copy();
-
-        $isNightShift = $shiftEnd->lt($shiftStart);
-
-        $todayShiftStart = $shiftStart->clone()->setDate($now->year, $now->month, $now->day);
-
-        if ($isNightShift && $now->hour < $shiftStart->hour) {
-            $todayShiftStart->subDay();
-            $shiftDate = $shiftDate->subDay();
-        }
-
-        // Disallow check-in on non-working days (weekends or unscheduled days)
-        // Ensure working_days is an array (handle if it's null or empty)
-        $workingDays = is_array($workingDays) ? array_map('strtolower', $workingDays) : ['mon', 'tue', 'wed', 'thu', 'fri'];
-
-        $dayKey = strtolower($shiftDate->format('D')); // Returns: 'Sun', 'Mon', 'Tue', etc. -> lowercase: 'sun', 'mon', 'tue', ...
-
-        if (!in_array($dayKey, $workingDays, true)) {
-            session()->flash('error', 'You cannot check in today because this is not one of your scheduled working days.');
             return;
         }
 
-        // Check if it's too early to check in (before shift start)
-        if ($now->lt($todayShiftStart)) {
-            session()->flash('error', 'You cannot check in before your shift starts at ' . $shiftStart->format('h:i A'));
+        $anchorDate = strtolower($now->format('D')) === $shift->day_of_week ? $now->copy() : $now->copy()->subDay();
+        $window = $this->buildShiftWindow($shift, $anchorDate);
+        $attendanceDate = $window['start']->toDateString();
+
+        $existing = Attendance::where('user_id', $user->id)
+            ->where('employee_shift_id', $shift->id)
+            ->where('date', $attendanceDate)
+            ->whereNull('check_out')
+            ->first();
+
+        if ($existing) {
+            $this->attendance = $existing;
+            session()->flash('error', 'You are already checked in for this shift.');
+
             return;
         }
-
-        // Validation: Verify Geo if needed (skipped for now, assumed frontend sends it)
 
         $this->attendance = Attendance::create([
             'user_id' => Auth::id(),
-            'date' => today(),
-            'check_in' => now(),
+            'employee_shift_id' => $shift->id,
+            'date' => $attendanceDate,
+            'check_in' => $now,
             'status' => 'present',
         ]);
 
-        $this->attendance->load('user');
+        $this->attendance->load('user', 'shift');
 
-        // Apply late penalty if check-in is after shift start + grace
         app(AttendancePenaltyService::class)->applyLatePenalty($this->attendance);
 
         $this->attendance->refresh();
 
         $this->refreshState();
 
-        session()->flash('success', 'Checked in successfully at ' . now()->format('H:i'));
+        session()->flash('success', 'Checked in successfully at '.$now->format('H:i'));
     }
 
     public function checkOut()
     {
-        if (!$this->attendance) return;
+        if (! $this->attendance) {
+            return;
+        }
 
         $shiftEndTime = $this->resolveShiftEnd();
 
-        if (!$shiftEndTime) {
+        if (! $shiftEndTime) {
             session()->flash('error', 'Your shift times are not configured. Contact your administrator.');
+
             return;
         }
 
         if (now()->lt($shiftEndTime)) {
-            session()->flash('error', 'You cannot check out before your shift ends at ' . $shiftEndTime->format('h:i A') . '.');
+            session()->flash('error', 'You cannot check out before your shift ends at '.$shiftEndTime->format('h:i A').'.');
+
             return;
         }
 
@@ -218,7 +312,9 @@ class EmployeePunchPad extends Component
 
     public function startBreak($type = 'lunch')
     {
-        if (!$this->attendance || $this->currentBreak) return;
+        if (! $this->attendance || $this->currentBreak) {
+            return;
+        }
 
         $this->attendance->update(['status' => 'on_break']);
 
@@ -234,7 +330,9 @@ class EmployeePunchPad extends Component
 
     public function endBreak()
     {
-        if (!$this->currentBreak) return;
+        if (! $this->currentBreak) {
+            return;
+        }
 
         $this->currentBreak->update(['ended_at' => now()]);
 

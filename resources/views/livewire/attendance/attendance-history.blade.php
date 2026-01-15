@@ -51,8 +51,10 @@
         </div>
     </div>
 
-    <div class="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800">
-        <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
+    <!-- Desktop Table View (hidden on mobile) -->
+    <div class="hidden md:block overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
                 <thead class="bg-zinc-50 dark:bg-zinc-800">
                     <tr>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{{ __('Employee') }}</th>
@@ -122,6 +124,83 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- Mobile Card View (visible only on mobile) -->
+    <div class="md:hidden space-y-4">
+        @forelse ($attendances as $attendance)
+            <div class="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800">
+                <!-- Employee Info -->
+                <div class="flex items-center gap-3 mb-4 pb-4 border-b border-zinc-200 dark:border-zinc-700">
+                    <div class="h-10 w-10 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-sm font-bold text-zinc-500 dark:text-zinc-300">
+                        {{ substr($attendance->user->first_name, 0, 1) }}{{ substr($attendance->user->last_name, 0, 1) }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-zinc-900 dark:text-white">
+                            {{ $attendance->user->first_name }} {{ $attendance->user->last_name }}
+                        </div>
+                        <div class="text-xs text-zinc-500 dark:text-zinc-400 truncate">
+                            {{ $attendance->user->email }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendance Details Grid -->
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase">{{ __('Date') }}</span>
+                        <span class="text-sm text-zinc-900 dark:text-white">{{ $attendance->date->format('M d, Y') }}</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase">{{ __('Check In') }}</span>
+                        <span class="text-sm font-mono text-zinc-900 dark:text-white">{{ $attendance->check_in->format('H:i') }}</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase">{{ __('Check Out') }}</span>
+                        <span class="text-sm font-mono text-zinc-900 dark:text-white">{{ $attendance->check_out ? $attendance->check_out->format('H:i') : '--:--' }}</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase">{{ __('Break Time') }}</span>
+                        @if($attendance->total_break_duration > 0)
+                            <span class="text-sm font-mono text-amber-600 dark:text-amber-400">
+                                {{ intdiv($attendance->total_break_duration, 60) }}h {{ $attendance->total_break_duration % 60 }}m
+                            </span>
+                        @else
+                            <span class="text-sm text-zinc-400 dark:text-zinc-600">--</span>
+                        @endif
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2 border-t border-zinc-200 dark:border-zinc-700">
+                        <span class="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase">{{ __('Duration') }}</span>
+                        @if($attendance->check_out && $attendance->check_in)
+                            @php
+                                $workDuration = $attendance->actual_work_duration;
+                                $totalMinutes = $attendance->check_out->diffInMinutes($attendance->check_in);
+                            @endphp
+                            @if($workDuration > 0)
+                                <span class="text-sm font-mono font-semibold text-zinc-900 dark:text-white">
+                                    {{ intdiv($workDuration, 60) }}h {{ $workDuration % 60 }}m
+                                </span>
+                            @else
+                                <span class="text-sm font-mono font-semibold text-zinc-900 dark:text-white">
+                                    {{ intdiv($totalMinutes, 60) }}h {{ $totalMinutes % 60 }}m
+                                </span>
+                            @endif
+                        @else
+                            <span class="text-sm text-zinc-400">--</span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div class="rounded-xl border border-zinc-200 bg-white p-8 text-center text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400">
+                {{ __('No attendance records found.') }}
+            </div>
+        @endforelse
     </div>
 
     <div class="mt-4">

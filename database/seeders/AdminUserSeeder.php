@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class AdminUserSeeder extends Seeder
@@ -15,7 +14,7 @@ class AdminUserSeeder extends Seeder
     {
         // Create admin user
         $admin = User::firstOrCreate(
-            ['email' => 'admin@arena.com'],
+            ['email' => 'abdulbarry.guenichi@gmail.com'],
             [
                 'name' => 'Administrator',
                 'first_name' => 'Admin',

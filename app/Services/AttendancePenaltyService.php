@@ -12,6 +12,7 @@ use Carbon\CarbonPeriod;
 class AttendancePenaltyService
 {
     private const PENALTY_STEP_MINUTES = 5; // each 5 minutes
+
     private const PENALTY_STEP_PERCENT = 0.05; // 5% of daily salary per step
 
     public function applyLatePenalty(Attendance $attendance): ?EmployeePenalty
@@ -20,18 +21,22 @@ class AttendancePenaltyService
         $date = Carbon::parse($attendance->date);
         $checkIn = Carbon::parse($attendance->check_in);
 
-        if (!$user->shift_start) {
+        $shift = $attendance->shift;
+        $shiftStartValue = $shift?->start_time ?? $user->shift_start;
+        $shiftEndValue = $shift?->end_time ?? $user->shift_end;
+
+        if (! $shiftStartValue || ! $shiftEndValue) {
             return null; // no shift configured, skip penalties
         }
 
-        $shiftStart = Carbon::parse($user->shift_start);
-        $shiftEnd = Carbon::parse($user->shift_end);
+        $shiftStart = Carbon::parse($shiftStartValue);
+        $shiftEnd = Carbon::parse($shiftEndValue);
 
         // Handle night shift (shift end is earlier than shift start, spans midnight)
         $isNightShift = $shiftEnd->lt($shiftStart);
 
         $allowedStart = $shiftStart->clone()->setDate($date->year, $date->month, $date->day);
-        $allowedStart->addMinutes($user->grace_period_minutes ?? 0);
+        $allowedStart->addMinutes($shift->grace_period_minutes ?? $user->grace_period_minutes ?? 0);
 
         // If night shift and check-in is very early morning, use previous day's shift time
         if ($isNightShift && $checkIn->hour < $shiftStart->hour) {
@@ -70,7 +75,7 @@ class AttendancePenaltyService
     {
         $user = $attendance->user;
         $date = Carbon::parse($attendance->date);
-        $allowance = $user->break_allowance_minutes ?? 0;
+        $allowance = $attendance->shift?->break_allowance_minutes ?? $user->break_allowance_minutes ?? 0;
 
         if ($allowance === 0 || $breakMinutes <= $allowance) {
             return null; // no allowance set or within allowance
@@ -100,7 +105,7 @@ class AttendancePenaltyService
 
     private function calculatePenaltyAmount(User $user, Carbon $date, int $steps): float
     {
-        if ($steps <= 0 || !$user->monthly_salary) {
+        if ($steps <= 0 || ! $user->monthly_salary) {
             return 0.0;
         }
 

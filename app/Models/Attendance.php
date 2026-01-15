@@ -3,12 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\EmployeePenalty;
 
 class Attendance extends Model
 {
     protected $fillable = [
         'user_id',
+        'employee_shift_id',
         'date',
         'check_in',
         'check_out',
@@ -23,6 +23,11 @@ class Attendance extends Model
     ];
 
     protected $appends = ['total_break_duration', 'actual_work_duration'];
+
+    public function shift()
+    {
+        return $this->belongsTo(EmployeeShift::class, 'employee_shift_id');
+    }
 
     public function user()
     {
@@ -60,7 +65,7 @@ class Attendance extends Model
      */
     public function getActualWorkDurationAttribute()
     {
-        if (!$this->check_out || !$this->check_in) {
+        if (! $this->check_out || ! $this->check_in) {
             return 0;
         }
 

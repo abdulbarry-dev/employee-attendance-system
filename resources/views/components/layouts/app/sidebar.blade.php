@@ -35,6 +35,10 @@
                             {{ __('My Attendance') }}
                         </flux:sidebar.item>
 
+                        <flux:sidebar.item icon="calendar-days" :href="route('employee.schedule')" :current="request()->routeIs('employee.schedule')" wire:navigate>
+                            {{ __('My Schedule') }}
+                        </flux:sidebar.item>
+
                         <flux:sidebar.item icon="user-circle" :href="route('employee.profile')" :current="request()->routeIs('employee.profile')" wire:navigate>
                             {{ __('My Profile') }}
                         </flux:sidebar.item>

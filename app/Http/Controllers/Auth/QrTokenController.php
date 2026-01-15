@@ -18,12 +18,6 @@ class QrTokenController extends Controller
                 ipAddress: $request->ip()
             );
 
-            Log::info('QR token generated', [
-                'token_preview' => substr($token->token, 0, 12) . '...',
-                'ip' => $request->ip(),
-                'agent' => $request->userAgent(),
-            ]);
-
             // Redirect to login page with token as URL parameter
             return redirect()->route('login', ['token' => $token->token])
                 ->with('success', 'QR code scanned successfully. Please log in with your credentials.');
@@ -33,6 +27,7 @@ class QrTokenController extends Controller
                 'error' => $e->getMessage(),
                 'ip' => $request->ip(),
             ]);
+
             return redirect()->route('login')->with('error', 'Failed to generate login token. Please try again.');
         }
     }
