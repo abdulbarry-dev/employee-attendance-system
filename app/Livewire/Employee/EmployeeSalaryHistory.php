@@ -4,18 +4,19 @@ namespace App\Livewire\Employee;
 
 use App\Models\Attendance;
 use App\Models\EmployeePenalty;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
-use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 
 #[Layout('components.layouts.app')]
 #[Title('Salary History')]
 class EmployeeSalaryHistory extends Component
 {
     public $selectedMonth;
+
     public $selectedYear;
 
     public function mount()
@@ -70,7 +71,7 @@ class EmployeeSalaryHistory extends Component
             ->oldest('date')
             ->first();
 
-        if (!$firstAttendance) {
+        if (! $firstAttendance) {
             return false; // No attendance records, cannot navigate back
         }
 
@@ -133,14 +134,14 @@ class EmployeeSalaryHistory extends Component
             $date->subMonth();
 
             // Check if we can go back before modifying state
-            if (!$this->canNavigatePrev()) {
+            if (! $this->canNavigatePrev()) {
                 return; // Don't navigate if at the first attendance month
             }
         } else {
             $date->addMonth();
 
             // Check if we can go forward before modifying state
-            if (!$this->canNavigateNext()) {
+            if (! $this->canNavigateNext()) {
                 return; // Don't navigate if at or beyond current month
             }
         }
@@ -168,7 +169,7 @@ class EmployeeSalaryHistory extends Component
 
         $grouped = $penalties->groupBy(fn ($penalty) => $penalty->occurred_on->format('Y-m'));
 
-        $months = $grouped->map(function ($items, $key) use ($monthlySalary, $user) {
+        $months = $grouped->map(function ($items, $key) use ($monthlySalary) {
             $date = Carbon::createFromFormat('Y-m', $key)->startOfMonth();
             $endOfMonth = $date->copy()->endOfMonth();
             $penaltyTotal = (float) $items->sum('penalty_amount');

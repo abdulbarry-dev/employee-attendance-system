@@ -2,10 +2,9 @@
 
 namespace App\Livewire\Attendance;
 
-use Livewire\Component;
-
 use App\Models\Attendance;
 use App\Models\User;
+use Livewire\Component;
 
 class DashboardStats extends Component
 {
@@ -20,7 +19,6 @@ class DashboardStats extends Component
             'completed' => Attendance::where('date', $today)->whereNotNull('check_out')->count(),
         ];
 
-
         $attendanceIds = Attendance::where('date', $today)->pluck('user_id');
         $stats['absent'] = $stats['total_employees'] - $attendanceIds->count();
 
@@ -32,7 +30,7 @@ class DashboardStats extends Component
 
         return view('livewire.attendance.dashboard-stats', [
             'stats' => $stats,
-            'latestAttendances' => $latestAttendances
+            'latestAttendances' => $latestAttendances,
         ]);
     }
 }

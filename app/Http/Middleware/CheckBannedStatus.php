@@ -37,12 +37,11 @@ class CheckBannedStatus
         $bannedAt = $user->banned_at?->format('F d, Y');
 
         if ($banReason) {
-            return "Your account has been suspended. Reason: {$banReason}" . ($bannedAt ? " (Suspended on {$bannedAt})" : "");
+            return "Your account has been suspended. Reason: {$banReason}".($bannedAt ? " (Suspended on {$bannedAt})" : '');
         }
 
         return $bannedAt
             ? "Your account has been suspended on {$bannedAt}. Please contact the administrator for assistance."
-            : "Your account has been suspended. Please contact the administrator for assistance.";
+            : 'Your account has been suspended. Please contact the administrator for assistance.';
     }
 }
-

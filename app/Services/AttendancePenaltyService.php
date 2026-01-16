@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
+use App\Jobs\SendPenaltyNotification;
 use App\Models\Attendance;
 use App\Models\EmployeePenalty;
 use App\Models\User;
-use App\Notifications\PenaltyIssued;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 
@@ -142,7 +142,6 @@ class AttendancePenaltyService
 
     private function notifyPenalty(User $user, EmployeePenalty $penalty): void
     {
-        $user->notify(new PenaltyIssued($penalty));
-        $penalty->update(['notified_at' => now()]);
+        SendPenaltyNotification::dispatch($user, $penalty);
     }
 }

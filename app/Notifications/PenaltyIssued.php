@@ -12,9 +12,7 @@ class PenaltyIssued extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public EmployeePenalty $penalty)
-    {
-    }
+    public function __construct(public EmployeePenalty $penalty) {}
 
     public function via(object $notifiable): array
     {

@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Employee;
 
+use App\Jobs\CalculatePenalties;
 use App\Models\Attendance;
 use App\Models\AttendanceBreak;
 use App\Models\EmployeeShift;
-use App\Services\AttendancePenaltyService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -267,7 +267,8 @@ class EmployeePunchPad extends Component
 
         $this->attendance->load('user', 'shift');
 
-        app(AttendancePenaltyService::class)->applyLatePenalty($this->attendance);
+        // Queue penalty calculation for background processing
+        CalculatePenalties::dispatch($this->attendance, 'late');
 
         $this->attendance->refresh();
 
@@ -340,8 +341,8 @@ class EmployeePunchPad extends Component
 
         $totalBreakMinutes = $this->attendance->total_break_duration;
 
-        app(AttendancePenaltyService::class)
-            ->applyBreakOveragePenalty($this->attendance, $totalBreakMinutes);
+        // Queue break penalty calculation for background processing
+        CalculatePenalties::dispatch($this->attendance, 'break_overage', $totalBreakMinutes);
 
         $this->attendance->update(['status' => 'present']);
 

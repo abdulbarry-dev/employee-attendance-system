@@ -321,7 +321,7 @@ class MonthlyScheduleView extends Component
     public function render()
     {
         $date = Carbon::createFromDate($this->year, $this->month, 1);
-        $monthName = __($date->format('F')) . ' ' . $date->format('Y');
+        $monthName = __($date->format('F')).' '.$date->format('Y');
 
         return view('livewire.admin.monthly-schedule-view', [
             'calendar' => $this->getCalendarGrid(),

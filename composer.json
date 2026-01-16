@@ -12,6 +12,7 @@
         "php": "^8.2",
         "laravel/fortify": "^1.30",
         "laravel/framework": "^12.0",
+        "laravel/horizon": "*",
         "laravel/tinker": "^2.10.1",
         "livewire/flux": "^2.9.0",
         "spatie/laravel-permission": "^6.24"
@@ -86,6 +87,10 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "platform": {
+            "ext-pcntl": "8.2",
+            "ext-posix": "8.2"
         }
     },
     "minimum-stability": "stable",

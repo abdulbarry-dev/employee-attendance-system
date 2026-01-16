@@ -13,7 +13,7 @@ class LoginResponse implements LoginResponseContract
         $tokenString = $request->input('token') ?? session('employee_login_token');
         if ($tokenString) {
             $token = EmployeeLoginToken::where('token', $tokenString)->first();
-            if ($token && !$token->used_at) {
+            if ($token && ! $token->used_at) {
                 $token->markAsUsed();
             }
         }

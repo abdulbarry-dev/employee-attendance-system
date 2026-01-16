@@ -4,10 +4,11 @@ namespace App\Notifications;
 
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class EmployeeWelcome extends Notification
+class EmployeeWelcome extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -19,6 +20,7 @@ class EmployeeWelcome extends Notification
     {
         $this->employee = $employee;
         $this->tempPassword = $tempPassword;
+        $this->onQueue('high');
     }
 
     public function via(object $notifiable): array
